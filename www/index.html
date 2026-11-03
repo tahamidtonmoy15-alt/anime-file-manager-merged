@@ -72,12 +72,30 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
 .pl-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}.pl-bar select{background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
 .warn{display:none;margin-top:10px;padding:12px;border-radius:14px;background:#3a2330;border:1px solid #ff829e66;font-size:12px}
 #newPoster{padding:8px!important}#newYear,#newSeasons,#newEpisodes{min-width:0}.fm-body .section-head{margin:10px 0 6px}.fm-body .section-head h2{font-size:14px}
+
+/* NOVA Watching integration — isolated from the base File Manager */
+.nova-watch-btn{background:linear-gradient(115deg,#7c3aed,#0891b2);border-color:transparent}
+#novaWatchBg{position:fixed;inset:0;z-index:35;background:#02040bdd;backdrop-filter:blur(9px);display:none;place-items:center;padding:14px}
+#novaWatchModal{width:min(920px,100%);max-height:92vh;overflow:auto;background:rgba(20,24,45,.98);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 25px 80px #000a}
+.nw-head{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:-18px;background:rgba(20,24,45,.98);padding:5px 0 12px;z-index:2}
+.nw-head h2{font-size:19px;margin:0}.nw-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.nw-list{display:grid;gap:12px}.nw-card{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.nw-poster{width:76px;height:108px;object-fit:cover;border-radius:10px;background:#171b31}
+.nw-title{font-size:14px;font-weight:800}.nw-meta{font-size:10px;color:var(--muted);margin:4px 0 8px}
+.nw-progress{height:5px;background:#ffffff20;border-radius:8px;overflow:hidden;margin:7px 0}.nw-progress i{display:block;height:100%;background:linear-gradient(90deg,#a78bfa,#67e8f9)}
+.nw-episodes{display:grid;gap:6px;margin-top:10px}.nw-episode{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:10px;background:#070b18aa;border:1px solid var(--line)}
+.nw-episode button{padding:6px 9px;font-size:10px}.nw-episode .nw-epname{flex:1;font-size:11px}.nw-episode.done .nw-epname{color:#9af4d1}
+.nw-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.nw-form label{font-size:10px;color:var(--muted)}.nw-form input,.nw-form select{display:block;width:100%;margin-top:4px;background:#0a0e1d;color:white;border:1px solid var(--line);border-radius:10px;padding:10px}
+.nw-form .full{grid-column:1/-1}
+@media(max-width:560px){.nw-card{grid-template-columns:58px minmax(0,1fr);gap:9px}.nw-poster{width:58px;height:84px}.nw-form{grid-template-columns:1fr}.nw-form .full{grid-column:auto}}
+
 </style>
 </head>
 <body>
 <header><div class="top">
  <div class="brand"><div class="logo">A</div><div><h1>Anime File Manager</h1><div class="sub">Your anime collection · Watch tracker</div></div></div>
- <div class="actions"><button onclick="retryPosters()">Reload Posters</button><button onclick="openAdd()">＋ Add Anime</button><button class="primary" onclick="openFM()">📂 File Manager</button><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"/></div>
+ <div class="actions"><button onclick="retryPosters()">Reload Posters</button><button class="nova-watch-btn" onclick="nwOpen()">▶ Watching Tracker</button><button onclick="openAdd()">＋ Add Anime</button><button class="primary" onclick="openFM()">📂 File Manager</button><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"/></div>
 </div></header>
 <main>
  <section class="hero">
@@ -101,6 +119,25 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
  <div class="section-head"><div><h2 id="sectionTitle">All Anime</h2><p id="sectionDesc">Browse your anime collection by category</p></div><div class="smallnote">Choose a status to filter your list</div></div>
  <div id="content"></div>
 </main>
+
+<div id="novaWatchBg" role="dialog" aria-modal="true" aria-label="NOVA Watching tracker">
+ <div id="novaWatchModal">
+  <div class="nw-head"><div><h2>Watching Tracker</h2><div class="nw-sub">Track seasons, episodes and watched progress · Anime File Manager remains the main app</div></div><button onclick="nwClose()">✕</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="primary" onclick="nwShowForm()">＋ Add to Watching</button><button onclick="nwRender()">Refresh</button></div>
+  <div id="nwFormBox" hidden>
+   <div class="nw-form">
+    <label class="full">Anime title *<input id="nwName" placeholder="Anime title"></label>
+    <label>Release year<input id="nwYear" type="number" min="1950" max="2100" placeholder="2026"></label>
+    <label>Weekly release day<select id="nwDay"><option value="Not set">Not set</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></label>
+    <label>Seasons<input id="nwSeasons" type="number" min="1" max="30" value="1"></label>
+    <label>Episodes per season<input id="nwEpisodes" type="number" min="1" max="200" value="12"></label>
+    <label class="full">Custom poster<input id="nwPoster" type="file" accept="image/*"></label>
+   </div>
+   <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px"><button onclick="nwHideForm()">Cancel</button><button class="primary" onclick="nwAdd()">Save Anime</button></div>
+  </div>
+  <div id="nwList" class="nw-list"></div>
+ </div>
+</div>
 <footer>
  <b>How to use:</b> Set each anime to Watched, Unwatched or Watching. Use the Watch Lists and Categories filters to organize your collection. Open Episodes on an anime card to manage local video files.<br>
  <b>Data:</b> Anime details and watch status are stored on this device. Use Export and Import to back up your library. Episode videos are stored in the app's browser storage; storage limits depend on the device and available space.<br>
@@ -212,14 +249,14 @@ function save(){localStorage.setItem(key,JSON.stringify(custom));localStorage.se
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function setStatus(name,s){if(statuses[name]===s)delete statuses[name];else statuses[name]=s;save();render();}
 function render(){
- const q=document.getElementById('search').value.toLowerCase(),df=document.getElementById('dubFilter').value,sort=document.getElementById('sort').value;
+ const q=document.getElementById('search').value.trim().toLowerCase(),df=document.getElementById('dubFilter').value,sort=document.getElementById('sort').value;
  const t=document.getElementById('tabs');t.innerHTML='';
  folders.forEach(([id,label])=>{let b=document.createElement('button');b.className='tab '+(active===id?'active':'');b.textContent=label+(id==='All'?'':` (${anime.filter(a=>statuses[a.name]===id).length})`);b.onclick=()=>{active=id;render()};t.appendChild(b)});
  const gt=document.getElementById('genreTabs');gt.innerHTML='';genreList().forEach(g=>{let b=document.createElement('button');b.className='tab '+(activeGenre===g?'active':'');b.textContent=g==='All'?'All Categories':g;b.onclick=()=>{activeGenre=g;render()};gt.appendChild(b)});
  let list=anime.filter(a=>{
   const statusOk=active==='All'||statuses[a.name]===active;
   const genreOk=activeGenre==='All'||a.genre===activeGenre;
-  const searchOk=a.name.toLowerCase().includes(q)||String(a.genre||'').toLowerCase().includes(q)||String(a.dub||'').toLowerCase().includes(q);
+  const searchOk=a.name.toLowerCase().includes(q)||String(a.genre||'').toLowerCase().includes(q)||String(a.dub||'').toLowerCase().includes(q)||String(a.year||'').toLowerCase().includes(q)||String(a.weeklyDay||'').toLowerCase().includes(q)||String(a.seasons||'').toLowerCase().includes(q)||String(a.episodes||'').toLowerCase().includes(q);
   const dubOk=df==='all'||a.dub===df;
   return statusOk&&genreOk&&searchOk&&dubOk;
  });
@@ -376,5 +413,62 @@ function importData(e){
  const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.statuses)statuses={...statuses,...d.statuses};if(Array.isArray(d.hiddenAnime))hiddenAnime=[...new Set([...hiddenAnime,...d.hiddenAnime])];if(Array.isArray(d.anime))custom=[...custom,...d.anime.filter(x=>!custom.some(y=>y.name.toLowerCase()===x.name.toLowerCase()))];save();rebuild();render();alert('Import completed');}catch(err){alert('The selected file is not valid JSON');}};r.readAsText(f);e.target.value='';
 }
 render();
+
+/* NOVA Watching tracker: separate storage key; uses the original AFM episode File Manager. */
+const NW_KEY='afm_nova_watching_v1';
+let nwItems=[];try{nwItems=JSON.parse(localStorage.getItem(NW_KEY)||'[]')||[]}catch(e){nwItems=[]}
+function nwSave(){try{localStorage.setItem(NW_KEY,JSON.stringify(nwItems))}catch(e){alert('Could not save Watching data. Free some browser storage and try again.')}}
+function nwOpen(){document.getElementById('novaWatchBg').style.display='grid';nwRender()}
+function nwClose(){document.getElementById('novaWatchBg').style.display='none';nwHideForm()}
+function nwShowForm(){document.getElementById('nwFormBox').hidden=false;document.getElementById('nwName').focus()}
+function nwHideForm(){document.getElementById('nwFormBox').hidden=true}
+function nwEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function nwProgress(x){const total=x.seasons*x.episodes,done=Object.values(x.done||{}).filter(Boolean).length;return{total,done,pct:total?Math.round(done/total*100):0}}
+function nwAdd(){
+ const name=document.getElementById('nwName').value.trim();if(!name){alert('Enter an anime title');return}
+ if(nwItems.some(x=>x.name.toLowerCase()===name.toLowerCase())){alert('This anime is already in Watching');return}
+ const year=Number(document.getElementById('nwYear').value)||'',day=document.getElementById('nwDay').value;
+ const seasons=Math.max(1,Math.min(30,Number(document.getElementById('nwSeasons').value)||1)),episodes=Math.max(1,Math.min(200,Number(document.getElementById('nwEpisodes').value)||12));
+ const file=document.getElementById('nwPoster').files[0];
+ const finish=poster=>{
+  nwItems.unshift({id:'nw'+Date.now()+Math.random().toString(36).slice(2,6),name,year,day,seasons,episodes,poster,done:{}});
+  nwSave();
+  if(!anime.some(a=>a.name.toLowerCase()===name.toLowerCase())){custom.push({name,genre:'Other',dub:'To Be Verified',year,seasons,episodes,weeklyDay:day,posterData:poster||''});save();rebuild();render()}
+  ['nwName','nwYear','nwPoster'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nwSeasons').value=1;document.getElementById('nwEpisodes').value=12;
+  nwHideForm();nwRender();
+ };
+ if(file){
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const scale=Math.min(1,480/img.width,700/img.height),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);finish(c.toDataURL('image/jpeg',.78))};
+  img.onerror=()=>{URL.revokeObjectURL(url);alert('Could not read the poster image')};img.src=url;
+ }else finish('');
+}
+function nwToggle(id,s,e){const x=nwItems.find(a=>a.id===id);if(!x)return;x.done=x.done||{};const k=s+'-'+e;if(x.done[k])delete x.done[k];else x.done[k]=true;nwSave();nwRender()}
+function nwDelete(id){if(!confirm('Delete this anime from Watching Tracker?'))return;nwItems=nwItems.filter(x=>x.id!==id);nwSave();nwRender()}
+function nwRender(){
+ const root=document.getElementById('nwList');if(!root)return;
+ if(!nwItems.length){root.innerHTML='<div class="empty">Your Watching list is empty. Choose “Add to Watching” to create one.</div>';return}
+ root.innerHTML=nwItems.map(x=>{
+  const p=nwProgress(x),poster=x.poster||posterCache[x.name]||posterFallback(x.name);
+  let eps='';
+  for(let s=1;s<=x.seasons;s++){
+   eps+='<div class="smallnote" style="margin:8px 0 4px">Season '+s+'</div>';
+   for(let e=1;e<=x.episodes;e++){
+    const done=!!(x.done||{})[s+'-'+e];
+    eps+='<div class="nw-episode '+(done?'done':'')+'"><span class="nw-epname">Episode '+e+(done?' · Watched':'')+'</span><button data-nw-toggle="'+x.id+'" data-season="'+s+'" data-episode="'+e+'">'+(done?'✓ Watched':'Mark watched')+'</button></div>';
+   }
+  }
+  return '<article class="nw-card"><img class="nw-poster" src="'+poster+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(x.day)+' · '+x.seasons+' Season · '+p.total+' Episodes</div><div class="nw-progress"><i style="width:'+p.pct+'%"></i></div><div class="nw-meta">'+p.done+'/'+p.total+' watched · '+p.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">📂 Open File Manager</button><button class="danger" data-nw-delete="'+x.id+'">Delete tracker</button></div><div class="nw-episodes">'+eps+'</div></div></article>';
+ }).join('');
+}
+document.getElementById('nwList').addEventListener('click',e=>{
+ const t=e.target.closest('[data-nw-toggle]'),d=e.target.closest('[data-nw-delete]'),f=e.target.closest('[data-nw-folder]');
+ if(t)nwToggle(t.dataset.nwToggle,Number(t.dataset.season),Number(t.dataset.episode));
+ if(d)nwDelete(d.dataset.nwDelete);
+ if(f){nwClose();openFolder(f.dataset.nwFolder)}
+});
+document.getElementById('novaWatchBg').addEventListener('mousedown',e=>{if(e.target.id==='novaWatchBg')nwClose()});
+
 </script>
 </body></html>
