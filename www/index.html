@@ -57,6 +57,18 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
 .smallnote{color:var(--muted);font-size:10px}
 @media(max-width:700px){main{padding:14px}.top{padding:11px 13px}.stats{grid-template-columns:repeat(2,1fr);gap:8px}.stat{padding:12px}.stat b{font-size:23px}.grid{grid-template-columns:1fr;gap:9px}.name{font-size:12px}.actions button{padding:8px 9px;font-size:11px}.section-head{align-items:start;flex-direction:column}.hero{padding:21px 18px;border-radius:19px}.poster{width:78px;height:108px;flex-basis:78px}.poster-wrap{flex-basis:78px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+/* Performance mode for Android/mobile WebView */
+@media(max-width:700px){
+ body{background-attachment:scroll}
+ body:before{display:none}
+ header,.hero,.stat,.card,#novaWatchModal,.nw-head{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ .card,.stat{box-shadow:0 4px 14px #0002}
+ .card{transition:none}
+ .card:hover{transform:none;box-shadow:0 4px 14px #0002}
+ button,.btn{transition:none}
+ #novaWatchBg{backdrop-filter:none}
+}
+
 
 .epbtn{width:100%;margin:-2px 0 8px;background:linear-gradient(120deg,#0e7490aa,#4f46e5aa);border-color:#67e8f944;font-size:11px;text-align:left}
 .epc{background:#0008;border-radius:8px;padding:1px 7px;margin-left:4px}
@@ -446,27 +458,33 @@ function nwAdd(){
 }
 function nwToggle(id,s,e){const x=nwItems.find(a=>a.id===id);if(!x)return;x.done=x.done||{};const k=s+'-'+e;if(x.done[k])delete x.done[k];else x.done[k]=true;nwSave();nwRender()}
 function nwDelete(id){if(!confirm('Delete this anime from Watching Tracker?'))return;nwItems=nwItems.filter(x=>x.id!==id);nwSave();nwRender()}
+let nwExpanded={};let nwSeason={};
 function nwRender(){
  const root=document.getElementById('nwList');if(!root)return;
  if(!nwItems.length){root.innerHTML='<div class="empty">Your Watching list is empty. Choose “Add to Watching” to create one.</div>';return}
  root.innerHTML=nwItems.map(x=>{
   const p=nwProgress(x),poster=x.poster||posterCache[x.name]||posterFallback(x.name);
-  let eps='';
-  for(let s=1;s<=x.seasons;s++){
-   eps+='<div class="smallnote" style="margin:8px 0 4px">Season '+s+'</div>';
+  const expanded=!!nwExpanded[x.id],season=Math.min(x.seasons,Math.max(1,Number(nwSeason[x.id])||1));
+  let episodes='';
+  if(expanded){
    for(let e=1;e<=x.episodes;e++){
-    const done=!!(x.done||{})[s+'-'+e];
-    eps+='<div class="nw-episode '+(done?'done':'')+'"><span class="nw-epname">Episode '+e+(done?' · Watched':'')+'</span><button data-nw-toggle="'+x.id+'" data-season="'+s+'" data-episode="'+e+'">'+(done?'✓ Watched':'Mark watched')+'</button></div>';
+    const done=!!(x.done||{})[season+'-'+e];
+    episodes+='<div class="nw-episode '+(done?'done':'')+'"><span class="nw-epname">Episode '+e+(done?' · Watched':'')+'</span><button data-nw-toggle="'+x.id+'" data-season="'+season+'" data-episode="'+e+'">'+(done?'✓ Watched':'Mark watched')+'</button></div>';
    }
   }
-  return '<article class="nw-card"><img class="nw-poster" src="'+poster+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(x.day)+' · '+x.seasons+' Season · '+p.total+' Episodes</div><div class="nw-progress"><i style="width:'+p.pct+'%"></i></div><div class="nw-meta">'+p.done+'/'+p.total+' watched · '+p.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">📂 Open File Manager</button><button class="danger" data-nw-delete="'+x.id+'">Delete tracker</button></div><div class="nw-episodes">'+eps+'</div></div></article>';
+  const seasonOptions=Array.from({length:x.seasons},(_,i)=>'<option value="'+(i+1)+'" '+(season===i+1?'selected':'')+'>Season '+(i+1)+'</option>').join('');
+  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" src="'+poster+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(x.day)+' · '+x.seasons+' Season · '+p.total+' Episodes</div><div class="nw-progress"><i style="width:'+p.pct+'%"></i></div><div class="nw-meta">'+p.done+'/'+p.total+' watched · '+p.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">📂 Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide episodes':'Show episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-episodes">'+episodes+'</div></div>':'')+'</div></article>';
  }).join('');
 }
 document.getElementById('nwList').addEventListener('click',e=>{
- const t=e.target.closest('[data-nw-toggle]'),d=e.target.closest('[data-nw-delete]'),f=e.target.closest('[data-nw-folder]');
+ const t=e.target.closest('[data-nw-toggle]'),d=e.target.closest('[data-nw-delete]'),f=e.target.closest('[data-nw-folder]'),x=e.target.closest('[data-nw-expand]');
  if(t)nwToggle(t.dataset.nwToggle,Number(t.dataset.season),Number(t.dataset.episode));
  if(d)nwDelete(d.dataset.nwDelete);
  if(f){nwClose();openFolder(f.dataset.nwFolder)}
+ if(x){const id=x.dataset.nwExpand;nwExpanded[id]=!nwExpanded[id];nwRender()}
+});
+document.getElementById('nwList').addEventListener('change',e=>{
+ const s=e.target.closest('[data-nw-season]');if(s){nwSeason[s.dataset.nwSeason]=Number(s.value)||1;nwRender()}
 });
 document.getElementById('novaWatchBg').addEventListener('mousedown',e=>{if(e.target.id==='novaWatchBg')nwClose()});
 
