@@ -57,6 +57,12 @@ jobs:
           Path("/tmp/anime-watching-tracker.js").write_text("\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/anime-watching-tracker.js
+      - name: Verify Android bridge and bundled catalogue
+        working-directory: anime-watching-tracker
+        run: |
+          grep -q "nativePromise('ExternalPlayer','open'" www/index.html
+          ! grep -q "Capacitor.registerPlugin" www/index.html
+          test -s www/catalogue.json
       - name: Build debug APK
         working-directory: anime-watching-tracker/android
         run: |

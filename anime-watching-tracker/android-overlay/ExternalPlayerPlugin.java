@@ -64,4 +64,22 @@ public class ExternalPlayerPlugin extends Plugin {
             call.reject(String.valueOf(e.getMessage()));
         }
     }
+
+    @PluginMethod
+    public void share(PluginCall call) {
+        try {
+            File f = new File(dir(), safe(call.getData().optString("name")));
+            if (!f.exists()) { call.reject("Share file does not exist"); return; }
+            Uri u = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", f);
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType(call.getData().optString("mime", "application/octet-stream"));
+            i.putExtra(Intent.EXTRA_STREAM, u);
+            i.setClipData(ClipData.newRawUri("file", u));
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            getActivity().startActivity(Intent.createChooser(i, call.getData().optString("title", "Share")));
+            call.resolve();
+        } catch (Exception e) {
+            call.reject(String.valueOf(e.getMessage()));
+        }
+    }
 }
