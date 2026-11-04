@@ -556,7 +556,7 @@ function weeklyRender(){
  list.innerHTML=selected.map(a=>{
   const title=esc(a.name),poster=posterCache[a.name]||a.posterData||posterFallback(a.name);
   const extra=[a.genre,a.year,a.seasons?a.seasons+' season'+(Number(a.seasons)===1?'':'s'):'',a.episodes?a.episodes+' episodes':''].filter(Boolean).join(' · ');
-  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><button data-week-open="'+title+'">📁 Open Episodes</button></div></article>';
+  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" data-week-pick="'+title+'" title="Click poster to change release day" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><button data-week-open="'+title+'">📁 Open Episodes</button></div></article>';
  }).join('');
  loadPosters(selected);
 }

@@ -7,8 +7,9 @@ An English-only Android anime library and watching tracker with a premium dark p
 - Bundled 251-title catalogue from the supplied list, grouped into Action/Adventure, Fantasy/Isekai, Romance/Drama, Mystery/Thriller, Sports, Comedy/Slice of Life, Sci-Fi/Mecha, Horror/Supernatural, Anime Movies, Classic TV Anime, OVA/Specials, Donghua and Latest Hindi Dub Releases. Supplied dub labels are carried as Confirmed, Partial, Needs verification, Classic TV Dub, Hindi Audio Listed, Latest Hindi Dub and To Be Verified.
 - Anime poster lookup, custom poster upload, add/edit/delete, search, category and watch-status filters, and A–Z / Z–A sort.
 - Weekly Schedule button with All Days and Monday–Sunday filters. Anime with a saved Weekly Release Day appears automatically; Open Episodes opens its File Manager folder.
-- Watching Tracker with year, weekly release day, seasons, per-season episode ticks and progress.
+- Watching Tracker with year, weekly release day, seasons, manually addable episode numbers per season, individual watched ticks and progress. Clicking an anime poster opens its Weekly Release Day picker; the picker can also create/open its episode tracker.
 - Local episode File Manager grouped by anime and season; videos are copied into app storage, sized, played, renamed, deleted and downloadable individually.
+- Each tracked episode can store its own video file, then play internally or open it in another compatible Android player. Replacing or deleting a linked video updates the tracker association.
 - Built-in WebView player with seek, skip, speed, volume, brightness, subtitle loading and best-effort audio-track selection.
 - Android Open in Other Player action using the system compatible-app chooser.
 - JSON backup/restore for custom anime, statuses, Watching progress and poster references.
