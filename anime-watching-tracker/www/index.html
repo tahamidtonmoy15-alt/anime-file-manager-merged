@@ -576,41 +576,19 @@ footer{border-top:1px solid rgba(174,143,231,.15)}
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
-/* Weekly File Manager-style browser */
-.weekly-browser-top{align-items:center;gap:10px}
-.weekly-back{min-width:70px}
-.weekly-breadcrumb{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:3px 0 10px;color:#a99abd;font-size:10px}
-.weekly-crumb{color:#aa9bc6}.weekly-crumb.current{color:#f1dcff;font-weight:800}.weekly-crumb-sep{color:#705b91}
-.weekly-browser-tools{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:10px}
-.weekly-browser-tools .weekly-summary{margin:0}
-.weekly-tool-actions{display:flex;gap:7px;flex-wrap:wrap}
-.weekly-list{display:grid;gap:8px}
-.weekly-folder-row,.weekly-file-row{width:100%;display:flex;align-items:center;gap:12px;min-width:0;padding:12px 13px;border:1px solid rgba(176,143,234,.22);border-radius:15px;background:linear-gradient(145deg,rgba(48,31,82,.83),rgba(13,32,58,.90));box-shadow:inset 0 1px 0 rgba(255,255,255,.045);text-align:left}
-.weekly-folder-row{cursor:pointer}
-.weekly-folder-row:hover{border-color:rgba(202,137,255,.52);background:linear-gradient(145deg,rgba(66,38,105,.91),rgba(15,45,76,.94))}
-.weekly-folder-icon,.weekly-file-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:11px;background:rgba(140,82,205,.16);font-size:18px}
-.weekly-folder-copy,.weekly-file-copy{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
-.weekly-folder-name,.weekly-file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f7edff;font-size:12px;font-weight:820}
-.weekly-folder-meta,.weekly-file-meta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#aa9ec7;font-size:10px;font-weight:500}
-.weekly-folder-detail,.weekly-file-detail{flex:0 0 auto;color:#b9a9d5;font-size:10px}
-.weekly-folder-arrow{color:#d2a7ff;font-size:22px;line-height:1}
-.weekly-folder-poster{width:43px;height:58px;flex:0 0 43px;object-fit:cover;border-radius:8px;background:#21163b}
-.weekly-file-row{flex-wrap:wrap}
-.weekly-file-row .weekly-file-copy{min-width:115px}
-.weekly-file-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex:0 0 auto}
-.weekly-action{padding:7px 9px;min-height:32px;font-size:10px;border-radius:10px}
-.weekly-action.weekly-tick.is-done{color:#a4f2d6;background:rgba(20,101,78,.55);border-color:rgba(91,228,181,.38)}
-.weekly-action.weekly-play{background:linear-gradient(110deg,#8337c3,#4b55bb);color:#fff;border-color:rgba(203,153,255,.34)}
-.weekly-group-label{margin:13px 2px 4px;color:#bca9d6;font-size:10px;font-weight:800;letter-spacing:.6px}
-@media(max-width:560px){
- .weekly-browser-top{align-items:flex-start}.weekly-back{min-width:0;padding:8px 10px}
- .weekly-folder-row,.weekly-file-row{gap:9px;padding:10px;border-radius:13px}
- .weekly-folder-detail,.weekly-file-detail{font-size:9px}
- .weekly-file-row .weekly-file-copy{flex:1 1 calc(100% - 60px)}
- .weekly-file-detail{margin-left:43px}
- .weekly-file-actions{width:100%;margin-left:43px;justify-content:flex-start}
- .weekly-file-actions .weekly-action{font-size:9px;padding:7px 8px}
-}
+/* Integrated Weekly filter — one Watching Tracker, no duplicate folder browser */
+.nw-week-filter{margin:0 0 14px;padding:12px 12px 9px;border:1px solid rgba(176,143,234,.21);border-radius:16px;background:linear-gradient(145deg,rgba(48,31,82,.50),rgba(13,32,58,.55))}
+.nw-week-filter-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.nw-week-filter-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nw-week-filter-head b{font-size:12px;color:#f4eaff}
+.nw-week-filter-head span{font-size:10px;color:#a99abd}
+.nw-day-tabs{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 5px;scrollbar-width:none}
+.nw-day-tabs::-webkit-scrollbar{display:none}
+.nw-day-tab{flex:0 0 auto;white-space:nowrap;display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;font-size:10px}
+.nw-day-tab em{font-style:normal;padding:1px 6px;border-radius:20px;background:rgba(0,0,0,.22);font-size:9px}
+.nw-day-tab.active{background:linear-gradient(110deg,#8536c5,#5553bd 62%,#176e9f);border-color:rgba(205,156,255,.38);color:#fff}
+.nw-title{display:block;width:100%;padding:0;margin:0 0 5px;text-align:left;border:0;background:none;box-shadow:none;color:#fff1ff;font-size:14px;font-weight:850}
+.nw-title:hover{transform:none;background:none;box-shadow:none;color:#d7b7ff}
 </style>
 </head>
 <body>
@@ -645,6 +623,10 @@ footer{border-top:1px solid rgba(174,143,231,.15)}
  <div id="novaWatchModal">
   <div class="nw-head"><div><h2>Watching Tracker</h2><div class="nw-sub">Track seasons, episodes and progress. Local videos stay in File Manager.</div></div><button onclick="nwClose()">✕</button></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="primary" onclick="nwShowForm()">＋ Add to Watching</button><button onclick="nwRender()">Refresh</button></div>
+  <div class="nw-week-filter" id="nwWeekFilter">
+   <div class="nw-week-filter-head"><div><b id="nwFilterTitle">Watch List</b><span id="nwFilterSummary">All anime</span></div><button id="nwBackToList" onclick="nwBackToList()" hidden>← All Anime</button></div>
+   <div class="nw-day-tabs" id="nwDayTabs"></div>
+  </div>
   <div id="nwFormBox" hidden>
    <div class="nw-form">
     <label class="full">Anime title *<input id="nwName" placeholder="Anime title"></label>
@@ -676,19 +658,6 @@ footer{border-top:1px solid rgba(174,143,231,.15)}
  <label class="smallnote">Custom Poster (optional)</label><input id="newPoster" type="file" accept="image/*"/>
  <div class="modal-actions"><button onclick="closeAdd()">Cancel</button><button class="primary" onclick="addAnime()">Add Anime</button></div>
 </div></div>
-<div id="weeklyBg" role="dialog" aria-modal="true" aria-label="Weekly Anime File Browser">
- <div id="weeklyModal">
-  <div class="fm-top weekly-browser-top">
-   <button id="weeklyBack" class="weekly-back" onclick="weeklyGoBack()" hidden>← Back</button>
-   <div style="flex:1;min-width:0"><h2 class="weekly-title" id="weeklyTitle">Weekly Anime Files</h2><div class="weekly-sub" id="weeklySub">Browse weekday, anime, season and episode folders.</div></div>
-   <button onclick="weeklyClose()" aria-label="Close Weekly">✕</button>
-  </div>
-  <div class="weekly-days" id="weeklyDays"></div>
-  <div class="weekly-breadcrumb" id="weeklyBreadcrumb"></div>
-  <div class="weekly-browser-tools"><div class="weekly-summary" id="weeklySummary"></div><div class="weekly-tool-actions"><button id="weeklyManageTracker" onclick="weeklyOpenEpisodeSettings()" hidden>☷ Manage Episodes</button><button id="weeklyFullFM" onclick="weeklyOpenFullFileManager()" hidden>📂 Full File Manager</button></div></div>
-  <div class="weekly-list" id="weeklyList"></div>
- </div>
-</div>
 <div id="weekPickBg" role="dialog" aria-modal="true" aria-label="Set Weekly Release Day">
  <div id="weekPickModal">
   <div class="fm-top"><div style="flex:1"><h2 class="weekly-title">Set Weekly Release Day</h2><div class="weekly-sub" id="weekPickTitle">Choose the day this anime releases.</div></div><button onclick="weekPickClose()">✕</button></div>
@@ -1015,82 +984,41 @@ document.addEventListener('click',e=>{
  if(poster){e.preventDefault();weekPickOpen(poster.dataset.weekPick)}
 });
 $('weekPickBg').addEventListener('click',e=>{if(e.target.id==='weekPickBg')weekPickClose()});
-/* Weekly schedule as a folder browser: Days → Anime → Seasons → Episode files. */
+/* Weekly is a day filter inside the single Watching Tracker, not a second File Manager. */
 const WEEK_DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-let weeklySelected='All Days';
-let weeklyReturnAfterFM=false;
-let weeklyReturnAfterTracker=false;
-let weeklyFolder={type:'days',anime:'',season:1};
-let weeklyRenderToken=0;
-function weeklyOpen(){if(weeklyFolder.type==='days'&&weeklySelected!=='All Days')weeklyFolder={type:'day',anime:'',season:1};$('weeklyBg').style.display='grid';weeklyRender()}
-function weeklyClose(){$('weeklyBg').style.display='none'}
-function weeklyMatches(day){return anime.filter(a=>{const d=String(a.weeklyDay||'').trim();return WEEK_DAYS.some(x=>x.toLowerCase()===d.toLowerCase())&&(day==='All Days'||d.toLowerCase()===day.toLowerCase())}).sort((a,b)=>a.name.localeCompare(b.name))}
-function weeklySetDay(day){weeklySelected=day;weeklyFolder=day==='All Days'?{type:'days',anime:'',season:1}:{type:'day',anime:'',season:1};weeklyRender()}
-function weeklyGoBack(){if(weeklyFolder.type==='season')weeklyFolder={type:'anime',anime:weeklyFolder.anime,season:1};else if(weeklyFolder.type==='anime')weeklyFolder={type:'day',anime:'',season:1};else if(weeklyFolder.type==='day'){weeklySelected='All Days';weeklyFolder={type:'days',anime:'',season:1}}weeklyRender()}
-function weeklyOpenFullFileManager(){if(weeklyFolder.type!=='anime')return;const name=weeklyFolder.anime;weeklyReturnAfterFM=true;weeklyClose();openFolder(name)}
-function weeklyOpenEpisodeSettings(){if(weeklyFolder.type!=='anime')return;const name=weeklyFolder.anime;weeklyReturnAfterTracker=true;weeklyClose();nwEnsureTracker(name)}
-function weeklyFileSize(bytes){if(typeof mb==='function')return mb(bytes||0);const n=Number(bytes)||0;return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
-function weeklyGetTitle(name){return anime.find(a=>a.name.toLowerCase()===String(name).toLowerCase())||{name,genre:'Other'}}
-function weeklyRenderDayTabs(){const nav=$('weeklyDays'),all=weeklyMatches('All Days');nav.innerHTML=['All Days',...WEEK_DAYS].map(day=>{const count=day==='All Days'?all.length:weeklyMatches(day).length;return '<button class="weekly-day '+(weeklySelected===day?'active':'')+'" data-week-day="'+day+'">'+day+' <span class="weekly-day-count">'+count+'</span></button>'}).join('')}
-function weeklySetHeader(title,sub,crumbs,canBack,showTools){$('weeklyTitle').textContent=title;$('weeklySub').textContent=sub;$('weeklyBack').hidden=!canBack;$('weeklyBack').style.display=canBack?'inline-flex':'none';$('weeklyFullFM').hidden=!showTools;$('weeklyFullFM').style.display=showTools?'inline-flex':'none';$('weeklyManageTracker').hidden=!showTools;$('weeklyManageTracker').style.display=showTools?'inline-flex':'none';$('weeklyBreadcrumb').innerHTML=crumbs.map((c,i)=>'<span class="weekly-crumb '+(i===crumbs.length-1?'current':'')+'">'+nwEsc(c)+'</span>').join('<span class="weekly-crumb-sep">›</span>')}
-function weeklyFolderRow(icon,title,subtitle,detail,attrs){return '<button type="button" class="weekly-folder-row" '+attrs+'><span class="weekly-folder-icon">'+icon+'</span><span class="weekly-folder-copy"><span class="weekly-folder-name">'+nwEsc(title)+'</span><span class="weekly-folder-meta">'+nwEsc(subtitle)+'</span></span><span class="weekly-folder-detail">'+nwEsc(detail||'')+'</span><span class="weekly-folder-arrow">›</span></button>'}
-function weeklyFileRow(icon,title,subtitle,detail,actions){return '<div class="weekly-file-row"><span class="weekly-file-icon">'+icon+'</span><span class="weekly-file-copy"><span class="weekly-file-name">'+nwEsc(title)+'</span><span class="weekly-file-meta">'+nwEsc(subtitle)+'</span></span><span class="weekly-file-detail">'+nwEsc(detail||'')+'</span><span class="weekly-file-actions">'+actions+'</span></div>'}
-async function weeklyRender(){
- const token=++weeklyRenderToken,list=$('weeklyList'),summary=$('weeklySummary'),path={...weeklyFolder};weeklyRenderDayTabs();
- if(path.type==='days'){
-  weeklySetHeader('Weekly Anime Files','Choose a release-day folder.',['Weekly','All Days'],false,false);
-  summary.textContent=weeklyMatches('All Days').length+' scheduled anime · 7 day folders';
-  list.innerHTML=WEEK_DAYS.map(day=>{const a=weeklyMatches(day);return weeklyFolderRow('📁',day,a.length+' anime scheduled',a.length+' items','data-week-folder-day="'+day+'"')}).join('');return;
- }
- if(path.type==='day'){
-  const entries=weeklyMatches(weeklySelected);
-  weeklySetHeader(weeklySelected+' Releases','Open an anime folder to browse its seasons and episode files.',['Weekly',weeklySelected],true,false);
-  summary.textContent=entries.length+' anime folders';
-  if(!entries.length){list.innerHTML='<div class="empty">No anime scheduled for '+nwEsc(weeklySelected)+'. Set a Weekly Release Day on an anime poster to add it here.</div>';return}
-  list.innerHTML=entries.map(a=>{const seasons=Math.max(1,Number(a.seasons)||1),episodes=Math.max(0,Number(a.episodes)||0),poster=posterCache[a.name]||a.posterData||posterFallback(a.name);return '<button type="button" class="weekly-folder-row weekly-anime-folder" data-week-folder-anime="'+nwEsc(a.name)+'"><img class="weekly-folder-poster" loading="lazy" src="'+poster+'" alt=""><span class="weekly-folder-copy"><span class="weekly-folder-name">'+nwEsc(a.name)+'</span><span class="weekly-folder-meta">'+nwEsc(a.genre||'Anime')+' · '+seasons+' season'+(seasons===1?'':'s')+'</span></span><span class="weekly-folder-detail">'+(episodes?episodes+' eps':'Open')+'</span><span class="weekly-folder-arrow">›</span></button>'}).join('');
-  loadPosters(entries);return;
- }
- if(path.type==='anime'){
-  const meta=weeklyGetTitle(path.anime),tracker=nwGetOrCreateTracker(path.anime),files=await epOf(path.anime);if(token!==weeklyRenderToken)return;
-  const p=nwProgress(tracker),count=Math.max(tracker.seasons,...files.map(f=>Number(f.season)||1),1),seasons=Array.from({length:count},(_,i)=>i+1);
-  weeklySetHeader(meta.name,'Browse season folders and saved episode videos.',['Weekly',weeklySelected,meta.name],true,true);
-  summary.textContent=count+' season folders · '+p.total+' episodes · '+p.done+' watched · '+files.length+' video files';
-  list.innerHTML=seasons.map(season=>{const eps=weeklySeasonEpisodes(tracker,season),videos=eps.filter(ep=>!!tracker.videos[season+'-'+ep]).length,watched=eps.filter(ep=>!!tracker.done[season+'-'+ep]).length,extra=files.filter(f=>(Number(f.season)||1)===season&&!Object.values(tracker.videos).includes(f.id)).length;return weeklyFolderRow('📁','Season '+season,eps.length+' episodes · '+watched+' watched',videos+' linked · '+extra+' other files','data-week-folder-season="'+season+'"')}).join('')||'<div class="empty">No season folders yet.</div>';return;
- }
- if(path.type==='season'){
-  const meta=weeklyGetTitle(path.anime),tracker=nwGetOrCreateTracker(path.anime),season=Number(path.season)||1,allFiles=await epOf(path.anime);if(token!==weeklyRenderToken)return;
-  const eps=weeklySeasonEpisodes(tracker,season),linkedIds=new Set(Object.values(tracker.videos));
-  const records=await Promise.all(eps.map(async ep=>{const key=season+'-'+ep,id=tracker.videos[key];if(!id)return{ep,key,record:null};try{return{ep,key,record:await epGet(id)}}catch(e){return{ep,key,record:null}}}));
-  if(token!==weeklyRenderToken)return;
-  let cleaned=false;records.forEach(x=>{if(tracker.videos[x.key]&&!x.record){delete tracker.videos[x.key];cleaned=true}});if(cleaned)nwSave();
-  const rows=records.map(({ep,key,record})=>{
-   const watched=!!tracker.done[key],id=record&&record.id,filename=record&&(record.fileName||record.title)||'No video uploaded',size=record?weeklyFileSize(record.size):'';
-   const tick='<button class="weekly-action weekly-tick '+(watched?'is-done':'')+'" data-week-toggle="'+tracker.id+'" data-season="'+season+'" data-episode="'+ep+'">'+(watched?'✓ Watched':'○ Unwatched')+'</button>';
-   const upload='<button class="weekly-action" data-week-upload="'+tracker.id+'" data-season="'+season+'" data-episode="'+ep+'">'+(record?'↻ Replace':'＋ Upload')+'</button>';
-   const play=record?'<button class="weekly-action weekly-play" data-week-play="'+tracker.id+'" data-season="'+season+'" data-episode="'+ep+'">▶ Play</button><button class="weekly-action" data-week-external="'+tracker.id+'" data-season="'+season+'" data-episode="'+ep+'">↗ Other Player</button><button class="weekly-action" data-week-download="'+id+'">↓ Download</button>':'';
-   return weeklyFileRow('🎬','Episode '+ep,filename,size,tick+upload+play);
-  }).join('');
-  const unlinked=allFiles.filter(f=>(Number(f.season)||1)===season&&!linkedIds.has(f.id));
-  const extra=unlinked.length?'<div class="weekly-group-label">Other files in this folder · '+unlinked.length+'</div>'+unlinked.map(file=>{const id=file.id,pct=+localStorage.getItem('hda_pct_'+id)||0;return weeklyFileRow('📄',file.title||file.fileName||'Video file',(file.fileName||'Local video')+' · '+pct+'% watched',weeklyFileSize(file.size),'<button class="weekly-action weekly-play" data-week-play-file="'+id+'">▶ Play</button><button class="weekly-action" data-week-external-file="'+id+'">↗ Other Player</button><button class="weekly-action" data-week-download="'+id+'">↓ Download</button><button class="weekly-action" data-week-delete-file="'+id+'">✕ Delete</button>')}).join(''):'';
-  weeklySetHeader(meta.name+' · Season '+season,'Episode files, watch status and video controls.',['Weekly',weeklySelected,meta.name,'Season '+season],true,false);
-  summary.textContent=eps.length+' episodes · '+records.filter(x=>x.record).length+' linked videos · '+records.filter(x=>tracker.done[x.key]).length+' watched';
-  list.innerHTML=(rows||'<div class="empty">No numbered episodes yet. Use Manage Episodes from the anime folder to create the episode list.</div>')+extra;
- }
+let nwViewMode='all';
+let nwDayFilter='All Days';
+let nwFocusId='';
+let nwReturnAfterFM=false;
+function weeklyOpen(){
+ nwViewMode='weekly';nwDayFilter='All Days';nwFocusId='';
+ nwSyncWeeklyEntries('All Days');nwShowModal();
 }
-$('weeklyBg').addEventListener('click',async e=>{
- const day=e.target.closest('[data-week-day]');if(day){weeklySetDay(day.dataset.weekDay);return}
- const fd=e.target.closest('[data-week-folder-day]');if(fd){weeklySelected=fd.dataset.weekFolderDay;weeklyFolder={type:'day',anime:'',season:1};weeklyRender();return}
- const fa=e.target.closest('[data-week-folder-anime]');if(fa){weeklyFolder={type:'anime',anime:fa.dataset.weekFolderAnime,season:1};weeklyRender();return}
- const fs=e.target.closest('[data-week-folder-season]');if(fs){weeklyFolder={type:'season',anime:weeklyFolder.anime,season:Number(fs.dataset.weekFolderSeason)||1};weeklyRender();return}
- const toggle=e.target.closest('[data-week-toggle]');if(toggle){nwToggle(toggle.dataset.weekToggle,Number(toggle.dataset.season),Number(toggle.dataset.episode));return}
- const upload=e.target.closest('[data-week-upload]');if(upload){await nwChooseVideo(upload.dataset.weekUpload,Number(upload.dataset.season),Number(upload.dataset.episode));return}
- const play=e.target.closest('[data-week-play]');if(play){await nwOpenEpisodeVideo(play.dataset.weekPlay,Number(play.dataset.season),Number(play.dataset.episode),false);return}
- const external=e.target.closest('[data-week-external]');if(external){await nwOpenEpisodeVideo(external.dataset.weekExternal,Number(external.dataset.season),Number(external.dataset.episode),true);return}
- const playFile=e.target.closest('[data-week-play-file]');if(playFile){playEp(playFile.dataset.weekPlayFile);return}
- const extFile=e.target.closest('[data-week-external-file]');if(extFile){await prepEp(extFile.dataset.weekExternalFile);shareEp();return}
- const dl=e.target.closest('[data-week-download]');if(dl){downloadEp(dl.dataset.weekDownload);return}
- const del=e.target.closest('[data-week-delete-file]');if(del){if(confirm('Delete this video file from app storage?')){await epDel(del.dataset.weekDeleteFile);nwRemoveVideoLink(del.dataset.weekDeleteFile);weeklyRender()}return}
-});
+function weeklyClose(){nwClose()}
+function nwShowModal(){document.getElementById('novaWatchBg').style.display='grid';nwRender()}
+function nwSyncWeeklyEntries(day){
+ const scheduled=anime.filter(a=>{
+  const d=String(a.weeklyDay||'').trim();
+  return WEEK_DAYS.some(x=>x.toLowerCase()===d.toLowerCase())&&(day==='All Days'||d.toLowerCase()===String(day).toLowerCase());
+ });
+ scheduled.forEach(a=>nwGetOrCreateTracker(a.name));
+}
+function nwDayItems(day){
+ const scheduled=nwItems.filter(x=>x.day&&x.day!=='Not set');
+ return day==='All Days'?scheduled:scheduled.filter(x=>String(x.day).toLowerCase()===String(day).toLowerCase());
+}
+function nwSetDayFilter(day){
+ nwDayFilter=day;nwFocusId='';
+ if(nwViewMode==='weekly')nwSyncWeeklyEntries(day);
+ nwRender();
+}
+function nwBackToList(){nwFocusId='';nwRender()}
+function nwRenderDayTabs(){
+ const box=document.getElementById('nwDayTabs');if(!box)return;
+ const counts=day=>day==='All Days'?nwDayItems('All Days').length:nwDayItems(day).length;
+ const tabs=['All Days',...WEEK_DAYS];
+ box.innerHTML=tabs.map(day=>'<button type="button" class="nw-day-tab '+(nwDayFilter===day?'active':'')+'" data-nw-day="'+day+'">'+(day==='All Days'?'All Days':day)+'<em>'+counts(day)+'</em></button>').join('');
+}
 
 render();
 
@@ -1228,8 +1156,24 @@ function nwGetOrCreateTracker(name){
 function nwEnsureTracker(name){const x=nwGetOrCreateTracker(name);nwExpanded[x.id]=x.episodesCollapsed!==true;nwSeason[x.id]=1;nwOpen()}
 function nwRender(){
  const root=document.getElementById('nwList');if(!root)return;
- if(!nwItems.length){root.innerHTML='<div class="empty">Your Watching list is empty. Choose Add to Watching or click an anime poster and choose Manage Episodes.</div>';return}
- root.innerHTML=nwItems.map(raw=>{
+ nwRenderDayTabs();
+ const back=document.getElementById('nwBackToList'),filterTitle=document.getElementById('nwFilterTitle'),filterSummary=document.getElementById('nwFilterSummary');
+ if(nwFocusId){
+  back.hidden=false;filterTitle.textContent='Anime Details';
+ }else{
+  back.hidden=true;filterTitle.textContent=nwViewMode==='weekly'?'Weekly Release Schedule':'Watch List';
+ }
+ let visible=nwFocusId?nwItems.filter(x=>x.id===nwFocusId):
+  nwViewMode==='weekly'?nwDayItems(nwDayFilter):
+  nwDayFilter==='All Days'?nwItems:nwItems.filter(x=>String(x.day||'').toLowerCase()===nwDayFilter.toLowerCase());
+ filterSummary.textContent=nwFocusId?(nwItems.find(x=>x.id===nwFocusId)?.name||'Selected anime'):
+  nwViewMode==='weekly'?(visible.length+' anime scheduled'+(nwDayFilter==='All Days'?' across the week':' for '+nwDayFilter)):
+  (visible.length+' anime in your Watching list'+(nwDayFilter==='All Days'?'':' · '+nwDayFilter));
+ if(!visible.length){
+  root.innerHTML='<div class="empty">'+(nwViewMode==='weekly'?'No anime scheduled for '+nwEsc(nwDayFilter)+'. Set a Weekly Release Day on an anime poster or add an anime to Watching.':'Your Watching list is empty. Choose Add to Watching or open an anime poster to manage its episodes.')+'</div>';
+  return;
+ }
+ root.innerHTML=visible.map(raw=>{
   const x=nwNormalizeItem(raw),progress=nwProgress(x),poster=x.poster||posterCache[x.name]||posterFallback(x.name);
   const expanded=x.episodesCollapsed!==true,season=Math.min(x.seasons,Math.max(1,Number(nwSeason[x.id])||1)),episodeList=nwSeasonEpisodes(x,season);
   let epRows='';
@@ -1243,7 +1187,7 @@ function nwRender(){
   }
   const seasonOptions=Array.from({length:x.seasons},(_,i)=>'<option value="'+(i+1)+'" '+(season===i+1?'selected':'')+'>Season '+(i+1)+'</option>').join('');
   const day=x.day&&x.day!=='Not set'?x.day:'Weekly day not set';
-  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" data-week-pick="'+nwEsc(x.name)+'" title="Click poster to set weekly release day" src="'+nwEsc(poster)+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(day)+' · '+x.seasons+' Season'+(x.seasons===1?'':'s')+'</div><div class="nw-progress"><i style="width:'+progress.pct+'%"></i></div><div class="nw-meta">'+progress.done+'/'+progress.total+' episodes watched · '+progress.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide '+episodeList.length+' Episodes':'Show '+episodeList.length+' Episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-add-episode"><input type="number" min="1" max="500" step="1" data-nw-range-input="'+x.id+'" placeholder="Episodes e.g. 12"><button data-nw-generate="'+x.id+'">Create 1–N</button></div><div class="nw-add-episode"><input type="number" min="1" step="1" data-nw-add-input="'+x.id+'" placeholder="Single episode number"><button data-nw-add-episode="'+x.id+'">Add Episode</button></div><div class="nw-episodes">'+(epRows||'<div class="smallnote">No episode numbers yet. Set a total above or add one episode number.</div>')+'</div></div>':'')+'</div></article>';
+  return '<article class="nw-card" data-nw-card="'+x.id+'"><img class="nw-poster" loading="lazy" decoding="async" data-week-pick="'+nwEsc(x.name)+'" title="Tap poster to set weekly release day" src="'+nwEsc(poster)+'" alt="Poster"><div><button class="nw-title" data-nw-expand="'+x.id+'" title="Open or hide episodes">'+nwEsc(x.name)+'</button><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(day)+' · '+x.seasons+' Season'+(x.seasons===1?'':'s')+'</div><div class="nw-progress"><i style="width:'+progress.pct+'%"></i></div><div class="nw-meta">'+progress.done+'/'+progress.total+' episodes watched · '+progress.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide '+episodeList.length+' Episodes':'Show '+episodeList.length+' Episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-add-episode"><input type="number" min="1" max="500" step="1" data-nw-range-input="'+x.id+'" placeholder="Episodes e.g. 12"><button data-nw-generate="'+x.id+'">Create 1–N</button></div><div class="nw-add-episode"><input type="number" min="1" step="1" data-nw-add-input="'+x.id+'" placeholder="Single episode number"><button data-nw-add-episode="'+x.id+'">Add Episode</button></div><div class="nw-episodes">'+(epRows||'<div class="smallnote">No episode numbers yet. Set a total above or add one episode number.</div>')+'</div></div>':'')+'</div></article>';
  }).join('');
 }
 document.getElementById('nwList').addEventListener('click',async e=>{
