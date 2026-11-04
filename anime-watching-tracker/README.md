@@ -2,6 +2,13 @@
 
 An English-only Android anime library and watching tracker with a premium dark purple/cyan glass interface.
 
+## Visual design
+
+- Premium light Lavender + Ice Blue Glassmorphism theme with soft gradients, translucent cards, refined shadows, rounded controls and improved typography.
+- Responsive mobile header with a swipeable action strip; the content no longer scrolls visibly beneath a transparent multi-row toolbar.
+- Matching visual styling across the anime catalogue, statistics, filters, category tabs, Watching Tracker, episode rows, Weekly Schedule, File Manager, add/edit dialogs and video player.
+- This is a presentation-only redesign. Existing JavaScript, storage keys, catalogue, poster data, controls, playback and file-management logic are retained.
+
 ## Included
 
 - Bundled 251-title catalogue from the supplied list, grouped into Action/Adventure, Fantasy/Isekai, Romance/Drama, Mystery/Thriller, Sports, Comedy/Slice of Life, Sci-Fi/Mecha, Horror/Supernatural, Anime Movies, Classic TV Anime, OVA/Specials, Donghua and Latest Hindi Dub Releases. Supplied dub labels are carried as Confirmed, Partial, Needs verification, Classic TV Dub, Hindi Audio Listed, Latest Hindi Dub and To Be Verified.
