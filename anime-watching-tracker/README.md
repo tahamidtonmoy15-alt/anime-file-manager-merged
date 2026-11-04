@@ -9,7 +9,7 @@ An English-only Android anime library and watching tracker with a premium dark p
 - Weekly Schedule button with All Days and Monday–Sunday filters. Anime with a saved Weekly Release Day appears automatically; Open Episodes opens its File Manager folder.
 - Watching Tracker with year, weekly release day, seasons, manually addable episode numbers per season, individual watched ticks and progress. Clicking an anime poster opens its Weekly Release Day picker; the picker can also create/open its episode tracker.
 - Local episode File Manager grouped by anime and season; videos are copied into app storage, sized, played, renamed, deleted and downloadable individually.
-- Each tracked episode can store its own video file, then play internally or open it in another compatible Android player. Replacing or deleting a linked video updates the tracker association.
+- Each tracked episode can store its own video file, then play internally or open it in another compatible Android player. Replacing or deleting a linked video updates the tracker association. Weekly release day remains selectable separately from the anime card and Episode Tracker.
 - Built-in WebView player with seek, skip, speed, volume, brightness, subtitle loading and best-effort audio-track selection.
 - Android Open in Other Player action using the system compatible-app chooser.
 - JSON backup/restore for custom anime, statuses, Watching progress and poster references.

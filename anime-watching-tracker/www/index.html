@@ -355,7 +355,7 @@ function render(){
 function card(a){const s=statuses[a.name]||'',n=esc(a.name);
  const b=(k,l)=>`<button class="${s===k?'on-'+k:''}" data-st="${k}" data-name="${n}">${l}</button>`;
  const details=[a.year,a.seasons?`${a.seasons} season${a.seasons===1?'':'s'}`:'',a.episodes?`${a.episodes} eps`: '',a.weeklyDay,a.releaseNote].filter(Boolean).join(' · ');
- return `<article class="card" data-name="${n}"><div class="poster-wrap"><img class="poster" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${n} poster" data-title="${n}" data-week-pick="${n}" title="Click poster to set weekly release day" src="${posterFallback(a.name)}"><span class="tag">${esc(a.dub)}</span></div><div class="card-body"><div class="name">${n}</div><div class="meta">${esc(a.genre)}${details?` · ${esc(details)}`:''}</div><button class="epbtn" data-open="${n}">📁 Episodes <span class="epc" data-ep="${n}">0</span></button><div class="status">${b('watched','Watched')}${b('unwatched','Unwatched')}${b('partial','Watching')}</div><div style="display:flex;gap:6px;margin-top:7px"><button data-edit-anime="${n}" style="padding:6px 9px;font-size:10px">Edit</button><button class="delete-anime" data-delete-anime="${n}" style="padding:6px 9px;font-size:10px">Remove Anime</button></div></div></article>`}
+ return `<article class="card" data-name="${n}"><div class="poster-wrap"><img class="poster" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${n} poster" data-title="${n}" data-open-tracker="${n}" title="Click poster to open Episode Tracker" src="${posterFallback(a.name)}"><span class="tag">${esc(a.dub)}</span></div><div class="card-body"><div class="name">${n}</div><div class="meta">${esc(a.genre)}${details?` · ${esc(details)}`:''}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="epbtn" data-open-tracker="${n}">▶ Episode Tracker</button><button data-week-pick="${n}">📅 Set Weekly Day</button><button data-open="${n}">📁 File Manager <span class="epc" data-ep="${n}">0</span></button></div><div class="status">${b('watched','Watched')}${b('unwatched','Unwatched')}${b('partial','Watching')}</div><div style="display:flex;gap:6px;margin-top:7px"><button data-edit-anime="${n}" style="padding:6px 9px;font-size:10px">Edit</button><button class="delete-anime" data-delete-anime="${n}" style="padding:6px 9px;font-size:10px">Remove Anime</button></div></div></article>`}
 document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit-anime]');if(ed){editAnime(ed.dataset.editAnime);return}const d=e.target.closest('[data-delete-anime]');if(d){deleteAnime(d.dataset.deleteAnime);return}const b=e.target.closest('[data-st]');if(b)setStatus(b.dataset.name,b.dataset.st)});
 async function editAnime(name){
  const oldName=String(name),item=anime.find(a=>a.name===oldName);if(!item)return;
@@ -526,7 +526,10 @@ function weekPickStore(){
 function weekPickSave(){if(!weekPickAnime)return;weekPickStore();weekPickClose()}
 function weekPickManage(){if(!weekPickAnime)return;const name=weekPickAnime;weekPickStore();weekPickClose();nwEnsureTracker(name)}
 document.addEventListener('click',e=>{
- const poster=e.target.closest('[data-week-pick]');if(poster){e.preventDefault();weekPickOpen(poster.dataset.weekPick)}
+ const tracker=e.target.closest('[data-open-tracker]');
+ if(tracker){e.preventDefault();if($('weeklyBg').style.display==='grid')weeklyClose();nwEnsureTracker(tracker.dataset.openTracker);return}
+ const poster=e.target.closest('[data-week-pick]');
+ if(poster){e.preventDefault();weekPickOpen(poster.dataset.weekPick)}
 });
 $('weekPickBg').addEventListener('click',e=>{if(e.target.id==='weekPickBg')weekPickClose()});
 /* Weekly schedule: only anime with a selected weekly release day appear here. */
@@ -556,7 +559,7 @@ function weeklyRender(){
  list.innerHTML=selected.map(a=>{
   const title=esc(a.name),poster=posterCache[a.name]||a.posterData||posterFallback(a.name);
   const extra=[a.genre,a.year,a.seasons?a.seasons+' season'+(Number(a.seasons)===1?'':'s'):'',a.episodes?a.episodes+' episodes':''].filter(Boolean).join(' · ');
-  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" data-week-pick="'+title+'" title="Click poster to change release day" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><button data-week-open="'+title+'">📁 Open Episodes</button></div></article>';
+  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" data-open-tracker="'+title+'" title="Open Episode Tracker" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><button data-week-open="'+title+'">📁 Open Episodes</button></div></article>';
  }).join('');
  loadPosters(selected);
 }
@@ -564,7 +567,7 @@ $('weeklyBg').addEventListener('click',e=>{
  const day=e.target.closest('[data-week-day]');
  if(day){weeklySelected=day.dataset.weekDay;weeklyRender();return}
  const open=e.target.closest('[data-week-open]');
- if(open){const title=open.dataset.weekOpen;weeklyClose();openFolder(title)}
+ if(open){const title=open.dataset.weekOpen;weeklyClose();nwEnsureTracker(title)}
 });
 
 render();
@@ -642,6 +645,15 @@ function nwAddEpisode(id){
  x.episodes=Math.max(...Object.values(x.episodeNumbers).map(a=>a.length),0);
  nwSave();nwRender();
 }
+function nwGenerateEpisodeRange(id){
+ const x=nwItems.find(a=>a.id===id);if(!x)return;nwNormalizeItem(x);
+ const season=Math.max(1,Number(nwSeason[id])||1),field=document.querySelector('[data-nw-range-input="'+id+'"]'),count=Number(field&&field.value);
+ if(!Number.isInteger(count)||count<1||count>500)return alert('Enter an episode count from 1 to 500');
+ const existing=x.episodeNumbers[String(season)]||[];
+ x.episodeNumbers[String(season)]=Array.from(new Set([...existing,...Array.from({length:count},(_,i)=>i+1)])).sort((a,b)=>a-b);
+ x.episodes=Math.max(...Object.values(x.episodeNumbers).map(a=>a.length),0);
+ nwSave();nwRender();
+}
 async function nwChooseVideo(id,season,episode){
  const input=document.createElement('input');input.type='file';input.accept='video/*,.mkv,.mp4,.webm,.avi,.mov';input.style.display='none';document.body.appendChild(input);
  input.onchange=async()=>{const file=input.files&&input.files[0];input.remove();if(file)await nwSaveEpisodeVideo(id,season,episode,file)};
@@ -675,14 +687,21 @@ function nwDelete(id){
 }
 let nwExpanded={};let nwSeason={};
 function nwEnsureTracker(name){
- let x=nwItems.find(a=>a.name.toLowerCase()===name.toLowerCase());
+ const a=anime.find(z=>z.name.toLowerCase()===String(name).toLowerCase())||{name,genre:'Other'};
+ let x=nwItems.find(z=>z.name.toLowerCase()===String(name).toLowerCase());
  if(!x){
-  const a=anime.find(z=>z.name.toLowerCase()===name.toLowerCase())||{name,genre:'Other'};
   const seasons=Math.max(1,Number(a.seasons)||1),episodes=Math.max(0,Number(a.episodes)||0);
   x=nwNormalizeItem({id:'nw'+Date.now()+Math.random().toString(36).slice(2,6),name:a.name,year:a.year||'',day:a.weeklyDay||'Not set',seasons,episodes,episodeNumbers:nwBuildEpisodeMap(seasons,episodes),poster:a.posterData||posterCache[a.name]||'',done:{},videos:{}});
-  nwItems.unshift(x);nwSave();
+  nwItems.unshift(x);
+ }else{
+  nwNormalizeItem(x);x.seasons=Math.max(x.seasons,Number(a.seasons)||1);
+  for(let s=1;s<=x.seasons;s++){
+   const key=String(s),existing=x.episodeNumbers[key]||[],count=Math.max(0,Number(a.episodes)||0);
+   if(count)x.episodeNumbers[key]=Array.from(new Set([...existing,...Array.from({length:count},(_,i)=>i+1)])).sort((p,q)=>p-q);
+  }
+  if(a.weeklyDay)x.day=a.weeklyDay;
  }
- nwExpanded[x.id]=true;nwSeason[x.id]=1;nwOpen();
+ nwSave();nwExpanded[x.id]=true;nwSeason[x.id]=1;nwOpen();
 }
 function nwRender(){
  const root=document.getElementById('nwList');if(!root)return;
@@ -701,16 +720,17 @@ function nwRender(){
   }
   const seasonOptions=Array.from({length:x.seasons},(_,i)=>'<option value="'+(i+1)+'" '+(season===i+1?'selected':'')+'>Season '+(i+1)+'</option>').join('');
   const day=x.day&&x.day!=='Not set'?x.day:'Weekly day not set';
-  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" data-week-pick="'+nwEsc(x.name)+'" title="Click poster to set weekly release day" src="'+nwEsc(poster)+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(day)+' · '+x.seasons+' Season'+(x.seasons===1?'':'s')+'</div><div class="nw-progress"><i style="width:'+progress.pct+'%"></i></div><div class="nw-meta">'+progress.done+'/'+progress.total+' episodes watched · '+progress.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide episodes':'Show episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-add-episode"><input type="number" min="1" step="1" data-nw-add-input="'+x.id+'" placeholder="Episode number"><button data-nw-add-episode="'+x.id+'">Add Episode</button></div><div class="nw-episodes">'+(epRows||'<div class="smallnote">No episode numbers yet. Add an episode number above.</div>')+'</div></div>':'')+'</div></article>';
+  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" data-week-pick="'+nwEsc(x.name)+'" title="Click poster to set weekly release day" src="'+nwEsc(poster)+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(day)+' · '+x.seasons+' Season'+(x.seasons===1?'':'s')+'</div><div class="nw-progress"><i style="width:'+progress.pct+'%"></i></div><div class="nw-meta">'+progress.done+'/'+progress.total+' episodes watched · '+progress.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide episodes':'Show episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-add-episode"><input type="number" min="1" max="500" step="1" data-nw-range-input="'+x.id+'" placeholder="Episodes e.g. 12"><button data-nw-generate="'+x.id+'">Create 1–N</button></div><div class="nw-add-episode"><input type="number" min="1" step="1" data-nw-add-input="'+x.id+'" placeholder="Single episode number"><button data-nw-add-episode="'+x.id+'">Add Episode</button></div><div class="nw-episodes">'+(epRows||'<div class="smallnote">No episode numbers yet. Set a total above or add one episode number.</div>')+'</div></div>':'')+'</div></article>';
  }).join('');
 }
 document.getElementById('nwList').addEventListener('click',async e=>{
  const upload=e.target.closest('[data-nw-upload]'),play=e.target.closest('[data-nw-play]'),external=e.target.closest('[data-nw-external]');
- const add=e.target.closest('[data-nw-add-episode]'),toggle=e.target.closest('[data-nw-toggle]');
+ const add=e.target.closest('[data-nw-add-episode]'),generate=e.target.closest('[data-nw-generate]'),toggle=e.target.closest('[data-nw-toggle]');
  const del=e.target.closest('[data-nw-delete]'),folder=e.target.closest('[data-nw-folder]'),expand=e.target.closest('[data-nw-expand]');
  if(upload){await nwChooseVideo(upload.dataset.nwUpload,Number(upload.dataset.season),Number(upload.dataset.episode));return}
  if(play){await nwOpenEpisodeVideo(play.dataset.nwPlay,Number(play.dataset.season),Number(play.dataset.episode),false);return}
  if(external){await nwOpenEpisodeVideo(external.dataset.nwExternal,Number(external.dataset.season),Number(external.dataset.episode),true);return}
+ if(generate){nwGenerateEpisodeRange(generate.dataset.nwGenerate);return}
  if(add){nwAddEpisode(add.dataset.nwAddEpisode);return}
  if(toggle){nwToggle(toggle.dataset.nwToggle,Number(toggle.dataset.season),Number(toggle.dataset.episode));return}
  if(del){nwDelete(del.dataset.nwDelete);return}
