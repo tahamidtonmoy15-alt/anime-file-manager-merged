@@ -102,12 +102,31 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
 .nw-form .full{grid-column:1/-1}
 @media(max-width:560px){.nw-card{grid-template-columns:58px minmax(0,1fr);gap:9px}.nw-poster{width:58px;height:84px}.nw-form{grid-template-columns:1fr}.nw-form .full{grid-column:auto}}
 
+
+/* Weekly release schedule */
+.weekly-btn{background:linear-gradient(115deg,#0e7490aa,#4f46e5aa);border-color:#67e8f955}
+#weeklyBg{position:fixed;inset:0;z-index:40;background:#02040bdd;backdrop-filter:blur(9px);display:none;place-items:center;padding:14px}
+#weeklyModal{width:min(900px,100%);max-height:92vh;overflow:auto;background:rgba(20,24,45,.98);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 25px 80px #000a}
+.weekly-title{font-size:19px;margin:0}.weekly-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.weekly-days{display:flex;gap:7px;overflow-x:auto;padding:6px 0 13px;scrollbar-width:thin}
+.weekly-day{white-space:nowrap;display:flex;align-items:center;gap:7px}
+.weekly-day.active{background:linear-gradient(120deg,#7c3aed,#0891b2);border-color:transparent}
+.weekly-day-count{font-size:10px;padding:2px 6px;border-radius:8px;background:#0004}
+.weekly-summary{font-size:11px;color:var(--muted);margin:3px 0 12px}
+.weekly-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:10px}
+.weekly-card{display:flex;gap:11px;align-items:flex-start;min-width:0;padding:10px;border:1px solid var(--line);border-radius:15px;background:var(--panel2)}
+.weekly-poster{width:65px;height:91px;flex:0 0 65px;object-fit:cover;border-radius:9px;background:#171b31}
+.weekly-card-body{min-width:0;flex:1}
+.weekly-card-title{font-size:12px;line-height:1.4;font-weight:800;overflow-wrap:anywhere}
+.weekly-card-meta{font-size:10px;color:var(--muted);margin:5px 0 9px}
+.weekly-card button{font-size:10px;padding:7px 9px}
+@media(max-width:560px){#weeklyModal{padding:14px}.weekly-list{grid-template-columns:1fr}.weekly-poster{width:58px;height:82px;flex-basis:58px}}
 </style>
 </head>
 <body>
 <header><div class="top">
  <div class="brand"><div class="logo">▶</div><div><h1>Anime Watching Tracker</h1><div class="sub">Anime catalogue · Watching progress · Local video library</div></div></div>
- <div class="actions"><button onclick="retryPosters()">Reload Posters</button><button class="nova-watch-btn" onclick="nwOpen()">▶ Watching Tracker</button><button onclick="openAdd()">＋ Add Anime</button><button class="primary" onclick="openFM()">📂 File Manager</button><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"/></div>
+ <div class="actions"><button onclick="retryPosters()">Reload Posters</button><button class="nova-watch-btn" onclick="nwOpen()">▶ Watching Tracker</button><button class="weekly-btn" onclick="weeklyOpen()">📅 Weekly</button><button onclick="openAdd()">＋ Add Anime</button><button class="primary" onclick="openFM()">📂 File Manager</button><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"/></div>
 </div></header>
 <main>
  <section class="hero">
@@ -167,6 +186,14 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
  <label class="smallnote">Custom Poster (optional)</label><input id="newPoster" type="file" accept="image/*"/>
  <div class="modal-actions"><button onclick="closeAdd()">Cancel</button><button class="primary" onclick="addAnime()">Add Anime</button></div>
 </div></div>
+<div id="weeklyBg" role="dialog" aria-modal="true" aria-label="Weekly Anime Schedule">
+ <div id="weeklyModal">
+  <div class="fm-top"><div style="flex:1;min-width:0"><h2 class="weekly-title">Weekly Anime Schedule</h2><div class="weekly-sub">Choose a day to see anime scheduled for that release day.</div></div><button onclick="weeklyClose()">✕</button></div>
+  <div class="weekly-days" id="weeklyDays"></div>
+  <div class="weekly-summary" id="weeklySummary"></div>
+  <div class="weekly-list" id="weeklyList"></div>
+ </div>
+</div>
 <div class="modal-bg" id="fmBg"><div class="modal fm">
  <div class="fm-top"><button id="fmBack" onclick="openFM()">←</button><h3 id="fmTitle"></h3><button onclick="closeFM()">✕</button></div>
  <div class="fm-body" id="fmBody"></div>
@@ -459,6 +486,44 @@ async function exportData(){
 function importData(e){
  const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.statuses)statuses={...statuses,...d.statuses};if(Array.isArray(d.hiddenAnime))hiddenAnime=[...new Set([...hiddenAnime,...d.hiddenAnime])];if(Array.isArray(d.anime))custom=[...custom,...d.anime.filter(x=>!custom.some(y=>y.name.toLowerCase()===x.name.toLowerCase()))];if(Array.isArray(d.watching)){nwItems=d.watching;nwSave()}if(d.posterCache&&typeof d.posterCache==='object'){posterCache={...posterCache,...d.posterCache};savePosterCache()}save();rebuild();render();alert('Import completed');}catch(err){alert('The selected file is not valid JSON');}};r.readAsText(f);e.target.value='';
 }
+/* Weekly schedule: only anime with a selected weekly release day appear here. */
+const WEEK_DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let weeklySelected='All Days';
+function weeklyOpen(){weeklySelected='All Days';$('weeklyBg').style.display='grid';weeklyRender()}
+function weeklyClose(){$('weeklyBg').style.display='none'}
+function weeklyMatches(day){
+ return anime.filter(a=>{
+  const releaseDay=String(a.weeklyDay||'').trim();
+  return WEEK_DAYS.some(d=>d.toLowerCase()===releaseDay.toLowerCase())&&(day==='All Days'||releaseDay.toLowerCase()===day.toLowerCase());
+ }).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function weeklyRender(){
+ const nav=$('weeklyDays'),list=$('weeklyList'),summary=$('weeklySummary');
+ const all=weeklyMatches('All Days'),options=['All Days',...WEEK_DAYS];
+ nav.innerHTML=options.map(day=>{
+  const count=day==='All Days'?all.length:weeklyMatches(day).length;
+  return '<button class="weekly-day '+(weeklySelected===day?'active':'')+'" data-week-day="'+day+'">'+day+' <span class="weekly-day-count">'+count+'</span></button>';
+ }).join('');
+ const selected=weeklyMatches(weeklySelected);
+ summary.textContent=weeklySelected==='All Days'?selected.length+' anime scheduled across the week':selected.length+' anime scheduled for '+weeklySelected;
+ if(!selected.length){
+  list.innerHTML='<div class="empty" style="grid-column:1/-1">No anime scheduled for '+(weeklySelected==='All Days'?'this week':weeklySelected)+'. Add or edit an anime and choose its Weekly Release Day to show it here.</div>';
+  return;
+ }
+ list.innerHTML=selected.map(a=>{
+  const title=esc(a.name),poster=posterCache[a.name]||a.posterData||posterFallback(a.name);
+  const extra=[a.genre,a.year,a.seasons?a.seasons+' season'+(Number(a.seasons)===1?'':'s'):'',a.episodes?a.episodes+' episodes':''].filter(Boolean).join(' · ');
+  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><button data-week-open="'+title+'">📁 Open Episodes</button></div></article>';
+ }).join('');
+ loadPosters(selected);
+}
+$('weeklyBg').addEventListener('click',e=>{
+ const day=e.target.closest('[data-week-day]');
+ if(day){weeklySelected=day.dataset.weekDay;weeklyRender();return}
+ const open=e.target.closest('[data-week-open]');
+ if(open){const title=open.dataset.weekOpen;weeklyClose();openFolder(title)}
+});
+
 render();
 
 /* Anime Watching tracker: separate storage key; uses the original AFM episode File Manager. */
