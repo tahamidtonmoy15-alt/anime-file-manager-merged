@@ -717,9 +717,9 @@ function countAll(){return db().then(d=>new Promise((res,rej)=>{const c={},r=d.t
 function epMeta(){return db().then(d=>new Promise((res,rej)=>{const o=[],r=d.transaction(ST).objectStore(ST).openCursor();r.onsuccess=()=>{const k=r.result;if(k){o.push({anime:k.value.anime,size:k.value.size});k.continue()}else res(o)};r.onerror=()=>rej(r.error)}))}
 async function refreshCounts(){try{const c=await countAll();document.querySelectorAll('[data-ep]').forEach(el=>el.textContent=c[el.dataset.ep]||0)}catch(e){}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openFolder(b.dataset.open)});
-function closeFM(){$('fmBg').style.display='none';refreshCounts();if(weeklyReturnAfterFM){weeklyReturnAfterFM=false;$('weeklyBg').style.display='grid';weeklyRender()}}
-function fmBackAction(){if(weeklyReturnAfterFM){$('fmBg').style.display='none';weeklyReturnAfterFM=false;$('weeklyBg').style.display='grid';weeklyRender()}else openFM()}
-async function openFM(){weeklyReturnAfterFM=false;fmAnime=null;$('fmBg').style.display='grid';$('fmTitle').textContent='📂 File Manager';$('fmBack').style.visibility='hidden';$('fmFoot').style.display='none';
+function closeFM(){$('fmBg').style.display='none';refreshCounts();if(nwReturnAfterFM){nwReturnAfterFM=false;nwShowModal()}}
+function fmBackAction(){if(nwReturnAfterFM){$('fmBg').style.display='none';nwReturnAfterFM=false;nwShowModal()}else openFM()}
+async function openFM(){nwReturnAfterFM=false;fmAnime=null;$('fmBg').style.display='grid';$('fmTitle').textContent='📂 File Manager';$('fmBack').style.visibility='hidden';$('fmFoot').style.display='none';
  const all=await epMeta(),g={};all.forEach(e=>(g[e.anime]??=[]).push(e));
  let est='';try{const x=await navigator.storage.estimate();est=`Used ${mb(x.usage)} / ${mb(x.quota)}`;if(navigator.storage.persist)navigator.storage.persist()}catch(e){}
  const items=Object.entries(g).sort();
@@ -973,13 +973,13 @@ function weekPickStore(){
  const day=$('weekPickSelect').value,updated={...a,weeklyDay:day};
  custom=custom.filter(x=>x.name.toLowerCase()!==a.name.toLowerCase());custom.push(updated);
  const tracker=nwItems.find(x=>x.name.toLowerCase()===a.name.toLowerCase());if(tracker){tracker.day=day||'Not set';nwSave()}
- save();rebuild();render();if($('weeklyBg').style.display==='grid')weeklyRender();
+ save();rebuild();render();if(document.getElementById('novaWatchBg').style.display==='grid'){if(nwViewMode==='weekly')nwSyncWeeklyEntries('All Days');nwRender()}
 }
 function weekPickSave(){if(!weekPickAnime)return;weekPickStore();weekPickClose()}
 function weekPickManage(){if(!weekPickAnime)return;const name=weekPickAnime;weekPickStore();weekPickClose();nwEnsureTracker(name)}
 document.addEventListener('click',e=>{
  const tracker=e.target.closest('[data-open-tracker]');
- if(tracker){e.preventDefault();if($('weeklyBg').style.display==='grid')weeklyClose();nwEnsureTracker(tracker.dataset.openTracker);return}
+ if(tracker){e.preventDefault();nwEnsureTracker(tracker.dataset.openTracker);return}
  const poster=e.target.closest('[data-week-pick]');
  if(poster){e.preventDefault();weekPickOpen(poster.dataset.weekPick)}
 });
@@ -1044,8 +1044,8 @@ function nwNormalizeItem(x){
  return x;
 }
 nwItems=nwItems.map(nwNormalizeItem);nwSave();
-function nwOpen(){document.getElementById('novaWatchBg').style.display='grid';nwRender()}
-function nwClose(){document.getElementById('novaWatchBg').style.display='none';nwHideForm();if(weeklyReturnAfterTracker){weeklyReturnAfterTracker=false;$('weeklyBg').style.display='grid';weeklyRender()}}
+function nwOpen(){nwViewMode='all';nwDayFilter='All Days';nwFocusId='';nwShowModal()}
+function nwClose(){document.getElementById('novaWatchBg').style.display='none';nwHideForm()}
 function nwShowForm(){document.getElementById('nwFormBox').hidden=false;document.getElementById('nwName').focus()}
 function nwHideForm(){document.getElementById('nwFormBox').hidden=true}
 function nwEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -1083,7 +1083,7 @@ function nwAdd(){
 function nwToggle(id,season,episode){
  const x=nwItems.find(a=>a.id===id);if(!x)return;nwNormalizeItem(x);
  const key=season+'-'+episode;if(x.done[key])delete x.done[key];else x.done[key]=true;
- nwSave();nwRender();if($('weeklyBg').style.display==='grid'&&weeklyFolder.type==='season')weeklyRender();
+ nwSave();nwRender();
 }
 function nwAddEpisode(id){
  const x=nwItems.find(a=>a.id===id);if(!x)return;nwNormalizeItem(x);
@@ -1116,7 +1116,7 @@ async function nwSaveEpisodeVideo(id,season,episode,file){
  try{
   await epPut(record);x.videos[key]=record.id;nwSave();
   if(oldId)try{await epDel(oldId)}catch(e){}
-  nwRender();if(fmAnime===x.name)drawFolder();if($('weeklyBg').style.display==='grid'&&weeklyFolder.type==='season')weeklyRender();
+  nwRender();if(fmAnime===x.name)drawFolder();
  }catch(e){alert('Could not save this episode video. Check free app storage.')}
 }
 async function nwOpenEpisodeVideo(id,season,episode,external){
@@ -1153,7 +1153,7 @@ function nwGetOrCreateTracker(name){
  }
  nwSave();return x;
 }
-function nwEnsureTracker(name){const x=nwGetOrCreateTracker(name);nwExpanded[x.id]=x.episodesCollapsed!==true;nwSeason[x.id]=1;nwOpen()}
+function nwEnsureTracker(name){const x=nwGetOrCreateTracker(name);nwFocusId=x.id;nwExpanded[x.id]=x.episodesCollapsed!==true;nwSeason[x.id]=1;nwShowModal()}
 function nwRender(){
  const root=document.getElementById('nwList');if(!root)return;
  nwRenderDayTabs();
@@ -1201,12 +1201,13 @@ document.getElementById('nwList').addEventListener('click',async e=>{
  if(add){nwAddEpisode(add.dataset.nwAddEpisode);return}
  if(toggle){nwToggle(toggle.dataset.nwToggle,Number(toggle.dataset.season),Number(toggle.dataset.episode));return}
  if(del){nwDelete(del.dataset.nwDelete);return}
- if(folder){nwClose();openFolder(folder.dataset.nwFolder);return}
- if(expand){const id=expand.dataset.nwExpand,item=nwItems.find(x=>x.id===id);if(item){item.episodesCollapsed=item.episodesCollapsed!==true;nwExpanded[id]=item.episodesCollapsed!==true;nwSave()}nwRender()}
+ if(folder){nwReturnAfterFM=true;nwClose();openFolder(folder.dataset.nwFolder);return}
+ if(expand){const id=expand.dataset.nwExpand,item=nwItems.find(x=>x.id===id);if(item){item.episodesCollapsed=item.episodesCollapsed!==true;nwExpanded[id]=item.episodesCollapsed!==true;nwSave()}nwRender();const card=document.querySelector('[data-nw-card="'+id+'"]');if(card)card.scrollIntoView({block:'nearest',behavior:'smooth'})}
 });
 document.getElementById('nwList').addEventListener('change',e=>{
  const select=e.target.closest('[data-nw-season]');if(select){nwSeason[select.dataset.nwSeason]=Number(select.value)||1;nwRender()}
 });
+document.getElementById('nwDayTabs').addEventListener('click',e=>{const day=e.target.closest('[data-nw-day]');if(day)nwSetDayFilter(day.dataset.nwDay)});
 document.getElementById('novaWatchBg').addEventListener('mousedown',e=>{if(e.target.id==='novaWatchBg')nwClose()});
 
 </script>
