@@ -1015,7 +1015,10 @@ function nwSetDayFilter(day){
 function nwBackToList(){nwFocusId='';nwRender()}
 function nwRenderDayTabs(){
  const box=document.getElementById('nwDayTabs');if(!box)return;
- const counts=day=>day==='All Days'?nwDayItems('All Days').length:nwDayItems(day).length;
+ const counts=day=>{
+  if(nwViewMode==='weekly')return nwDayItems(day).length;
+  return day==='All Days'?nwItems.length:nwItems.filter(x=>String(x.day||'').toLowerCase()===day.toLowerCase()).length;
+ };
  const tabs=['All Days',...WEEK_DAYS];
  box.innerHTML=tabs.map(day=>'<button type="button" class="nw-day-tab '+(nwDayFilter===day?'active':'')+'" data-nw-day="'+day+'">'+(day==='All Days'?'All Days':day)+'<em>'+counts(day)+'</em></button>').join('');
 }
