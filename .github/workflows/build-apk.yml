@@ -1,8 +1,6 @@
-name: Anime File Manager - Build APK
+name: Legacy Bankai File Manager - Manual Build Only
 
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
 
 permissions:
