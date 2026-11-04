@@ -121,6 +121,19 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
 .weekly-card-meta{font-size:10px;color:var(--muted);margin:5px 0 9px}
 .weekly-card button{font-size:10px;padding:7px 9px}
 @media(max-width:560px){#weeklyModal{padding:14px}.weekly-list{grid-template-columns:1fr}.weekly-poster{width:58px;height:82px;flex-basis:58px}}
+
+#weekPickBg{position:fixed;inset:0;z-index:45;background:#02040bdd;backdrop-filter:blur(9px);display:none;place-items:center;padding:14px}
+#weekPickModal{width:min(480px,100%);background:rgba(20,24,45,.98);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 25px 80px #000a}
+.poster,.nw-poster,.weekly-poster{cursor:pointer}
+.nw-episode{flex-wrap:wrap}
+.nw-epname{min-width:90px}
+.nw-ep-actions{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+.nw-ep-actions button{padding:6px 8px;font-size:10px}
+.nw-ep-actions .nw-video-state{font-size:9px;color:var(--muted);align-self:center}
+.nw-add-episode{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:9px 0}
+.nw-add-episode input{width:130px;max-width:45%;background:#0a0e1d;color:white;border:1px solid var(--line);border-radius:9px;padding:9px}
+.nw-ep-tick{min-width:29px;padding:5px!important}
+.nw-ep-tick.done{background:#14543f99;color:#9af4d1;border-color:#55e6b044}
 </style>
 </head>
 <body>
@@ -192,6 +205,16 @@ footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);
   <div class="weekly-days" id="weeklyDays"></div>
   <div class="weekly-summary" id="weeklySummary"></div>
   <div class="weekly-list" id="weeklyList"></div>
+ </div>
+</div>
+<div id="weekPickBg" role="dialog" aria-modal="true" aria-label="Set Weekly Release Day">
+ <div id="weekPickModal">
+  <div class="fm-top"><div style="flex:1"><h2 class="weekly-title">Set Weekly Release Day</h2><div class="weekly-sub" id="weekPickTitle">Choose the day this anime releases.</div></div><button onclick="weekPickClose()">✕</button></div>
+  <label class="smallnote" for="weekPickSelect">Weekly release day</label>
+  <select id="weekPickSelect" style="width:100%;margin:8px 0 14px;background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:10px;padding:12px">
+   <option value="">Not set</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+  </select>
+  <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button onclick="weekPickClose()">Cancel</button><button onclick="weekPickManage()">Save & Manage Episodes</button><button class="primary" onclick="weekPickSave()">Save Day</button></div>
  </div>
 </div>
 <div class="modal-bg" id="fmBg"><div class="modal fm">
@@ -332,7 +355,7 @@ function render(){
 function card(a){const s=statuses[a.name]||'',n=esc(a.name);
  const b=(k,l)=>`<button class="${s===k?'on-'+k:''}" data-st="${k}" data-name="${n}">${l}</button>`;
  const details=[a.year,a.seasons?`${a.seasons} season${a.seasons===1?'':'s'}`:'',a.episodes?`${a.episodes} eps`: '',a.weeklyDay,a.releaseNote].filter(Boolean).join(' · ');
- return `<article class="card" data-name="${n}"><div class="poster-wrap"><img class="poster" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${n} poster" data-title="${n}" src="${posterFallback(a.name)}"><span class="tag">${esc(a.dub)}</span></div><div class="card-body"><div class="name">${n}</div><div class="meta">${esc(a.genre)}${details?` · ${esc(details)}`:''}</div><button class="epbtn" data-open="${n}">📁 Episodes <span class="epc" data-ep="${n}">0</span></button><div class="status">${b('watched','Watched')}${b('unwatched','Unwatched')}${b('partial','Watching')}</div><div style="display:flex;gap:6px;margin-top:7px"><button data-edit-anime="${n}" style="padding:6px 9px;font-size:10px">Edit</button><button class="delete-anime" data-delete-anime="${n}" style="padding:6px 9px;font-size:10px">Remove Anime</button></div></div></article>`}
+ return `<article class="card" data-name="${n}"><div class="poster-wrap"><img class="poster" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${n} poster" data-title="${n}" data-week-pick="${n}" title="Click poster to set weekly release day" src="${posterFallback(a.name)}"><span class="tag">${esc(a.dub)}</span></div><div class="card-body"><div class="name">${n}</div><div class="meta">${esc(a.genre)}${details?` · ${esc(details)}`:''}</div><button class="epbtn" data-open="${n}">📁 Episodes <span class="epc" data-ep="${n}">0</span></button><div class="status">${b('watched','Watched')}${b('unwatched','Unwatched')}${b('partial','Watching')}</div><div style="display:flex;gap:6px;margin-top:7px"><button data-edit-anime="${n}" style="padding:6px 9px;font-size:10px">Edit</button><button class="delete-anime" data-delete-anime="${n}" style="padding:6px 9px;font-size:10px">Remove Anime</button></div></div></article>`}
 document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit-anime]');if(ed){editAnime(ed.dataset.editAnime);return}const d=e.target.closest('[data-delete-anime]');if(d){deleteAnime(d.dataset.deleteAnime);return}const b=e.target.closest('[data-st]');if(b)setStatus(b.dataset.name,b.dataset.st)});
 async function editAnime(name){
  const oldName=String(name),item=anime.find(a=>a.name===oldName);if(!item)return;
@@ -486,6 +509,26 @@ async function exportData(){
 function importData(e){
  const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.statuses)statuses={...statuses,...d.statuses};if(Array.isArray(d.hiddenAnime))hiddenAnime=[...new Set([...hiddenAnime,...d.hiddenAnime])];if(Array.isArray(d.anime))custom=[...custom,...d.anime.filter(x=>!custom.some(y=>y.name.toLowerCase()===x.name.toLowerCase()))];if(Array.isArray(d.watching)){nwItems=d.watching;nwSave()}if(d.posterCache&&typeof d.posterCache==='object'){posterCache={...posterCache,...d.posterCache};savePosterCache()}save();rebuild();render();alert('Import completed');}catch(err){alert('The selected file is not valid JSON');}};r.readAsText(f);e.target.value='';
 }
+
+let weekPickAnime='';
+function weekPickOpen(name){
+ const a=anime.find(x=>x.name.toLowerCase()===String(name).toLowerCase());if(!a)return;
+ weekPickAnime=a.name;$('weekPickTitle').textContent=a.name;$('weekPickSelect').value=a.weeklyDay||'';$('weekPickBg').style.display='grid';
+}
+function weekPickClose(){$('weekPickBg').style.display='none';weekPickAnime=''}
+function weekPickStore(){
+ const a=anime.find(x=>x.name.toLowerCase()===weekPickAnime.toLowerCase());if(!a)return;
+ const day=$('weekPickSelect').value,updated={...a,weeklyDay:day};
+ custom=custom.filter(x=>x.name.toLowerCase()!==a.name.toLowerCase());custom.push(updated);
+ const tracker=nwItems.find(x=>x.name.toLowerCase()===a.name.toLowerCase());if(tracker){tracker.day=day||'Not set';nwSave()}
+ save();rebuild();render();if($('weeklyBg').style.display==='grid')weeklyRender();
+}
+function weekPickSave(){if(!weekPickAnime)return;weekPickStore();weekPickClose()}
+function weekPickManage(){if(!weekPickAnime)return;const name=weekPickAnime;weekPickStore();weekPickClose();nwEnsureTracker(name)}
+document.addEventListener('click',e=>{
+ const poster=e.target.closest('[data-week-pick]');if(poster){e.preventDefault();weekPickOpen(poster.dataset.weekPick)}
+});
+$('weekPickBg').addEventListener('click',e=>{if(e.target.id==='weekPickBg')weekPickClose()});
 /* Weekly schedule: only anime with a selected weekly release day appear here. */
 const WEEK_DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 let weeklySelected='All Days';
