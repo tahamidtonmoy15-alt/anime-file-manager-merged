@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10131d">
+<title>Anime Watching Tracker</title>
+<style>
+:root{
+ --bg:#080b16;--panel:rgba(24,29,51,.58);--panel2:rgba(255,255,255,.075);
+ --text:#f5f6ff;--muted:#aab3cc;--line:rgba(205,215,255,.15);
+ --accent:#a78bfa;--accent2:#67e8f9;--green:#55e6b0;--yellow:#ffd479;--red:#ff829e;
+ --glass:blur(22px) saturate(145%);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;
+ background:radial-gradient(ellipse at 12% 0%,#473b83 0,transparent 32%),radial-gradient(ellipse at 90% 12%,#14536b 0,transparent 27%),linear-gradient(145deg,#080b16,#11152a 55%,#090d19);background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:radial-gradient(#fff 0.55px,transparent .55px);background-size:5px 5px}
+header{position:sticky;top:0;z-index:10;background:rgba(9,12,25,.68);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border-bottom:1px solid var(--line)}
+.top{max-width:1480px;margin:auto;padding:13px 24px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#c4b5fd,#6366f1 55%,#22d3ee);display:grid;place-items:center;font-size:24px;font-weight:950;color:#101329;box-shadow:0 8px 30px #8b5cf655}
+h1{font-size:19px;margin:0;letter-spacing:.2px}.sub{font-size:11px;color:var(--muted);margin-top:3px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:rgba(255,255,255,.075);color:var(--text);border-radius:12px;padding:9px 12px;cursor:pointer;font:inherit;font-size:12px;font-weight:700;transition:transform .18s,border-color .18s,background .18s}
+button:hover,.btn:hover{border-color:#a78bfa99;background:rgba(167,139,250,.15);transform:translateY(-1px)}
+button.primary{background:linear-gradient(120deg,#8b5cf6,#6366f1);border-color:transparent;color:white}
+main{max-width:1480px;margin:auto;padding:22px 24px}
+.hero{position:relative;overflow:hidden;padding:26px 28px;margin:5px 0 18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(110deg,rgba(116,83,202,.24),rgba(37,184,202,.09)),rgba(255,255,255,.055);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);box-shadow:0 18px 55px #0003}
+.hero:after{content:"";position:absolute;width:240px;height:240px;right:5%;top:-120px;border-radius:50%;background:#8b5cf6;filter:blur(75px);opacity:.22;pointer-events:none}
+.hero h2{font-size:clamp(22px,4vw,34px);margin:0 0 7px;letter-spacing:-.6px}.hero p{color:#c4cbe0;margin:0;font-size:13px;max-width:650px;line-height:1.7}.hero-kicker{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#a5f3fc;margin-bottom:8px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat{position:relative;overflow:hidden;background:var(--panel);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:18px;padding:15px 17px;box-shadow:0 12px 35px #0002}
+.stat:after{content:"";position:absolute;width:70px;height:70px;right:-28px;bottom:-35px;border-radius:50%;background:#a78bfa;filter:blur(25px);opacity:.24}
+.stat b{display:block;font-size:27px;line-height:1.2}.stat span{font-size:11px;color:var(--muted)}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0 13px}
+.controls input,.controls select,.modal input{background:rgba(10,14,29,.68);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:11px 13px;min-width:160px;outline:none}
+.controls input:focus,.controls select:focus,.modal input:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #a78bfa22}
+.controls input{flex:1;min-width:220px}.controls select option,.modal select option{background:#171b31;color:white}
+.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 12px;scrollbar-width:thin}
+.tab{white-space:nowrap}.tab.active{background:linear-gradient(120deg,#7c3aed,#4f46e5);border-color:transparent;box-shadow:0 5px 18px #6366f144}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:14px 0}
+.section-head h2{font-size:18px;margin:0}.section-head p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px}
+.card{position:relative;display:flex;align-items:flex-start;padding:10px;gap:12px;min-width:0;overflow:hidden;background:var(--panel);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:17px;box-shadow:0 9px 28px #0002;transition:transform .2s,border-color .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);border-color:#a78bfa77;box-shadow:0 15px 35px #0004}
+.poster{width:84px;height:116px;object-fit:cover;background:linear-gradient(135deg,#292f52,#171b31);display:block;border-radius:11px;flex:0 0 84px;box-shadow:0 5px 18px #0005}
+.poster-wrap{position:relative;flex:0 0 84px}.tag{position:absolute;left:4px;top:4px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#090d1de8;border:1px solid #ffffff30;border-radius:6px;padding:3px 5px;font-size:8px;color:#e5e7ff}
+.card-body{padding:2px 0;min-width:0;flex:1}.name{font-size:13px;font-weight:800;line-height:1.45;min-height:36px}.meta{font-size:10px;color:var(--muted);margin:5px 0 10px}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.status button{font-size:10px;padding:7px 2px;border-radius:8px;background:rgba(255,255,255,.065);color:#d6dcf1;border-color:transparent}
+.status button.on-watched{background:#14543f99;color:#9af4d1;border-color:#55e6b044}.status button.on-unwatched{background:#59451688;color:#ffe09a;border-color:#ffd47944}.status button.on-partial{background:#57305e88;color:#f0b6ff;border-color:#e9a8ff44}
+.empty{padding:38px 18px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:18px}
+footer{max-width:1480px;margin:25px auto;padding:0 24px 30px;color:var(--muted);font-size:11px;line-height:1.8}
+.modal-bg{position:fixed;inset:0;background:#02040bcc;backdrop-filter:blur(8px);display:none;place-items:center;z-index:20;padding:18px}
+.modal{width:min(480px,100%);background:rgba(20,24,45,.96);backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:22px;padding:21px;box-shadow:0 25px 80px #0008}
+.modal h3{margin:0 0 16px}.modal input{width:100%;margin:7px 0 12px}.modal-actions{display:flex;justify-content:flex-end;gap:8px}
+.smallnote{color:var(--muted);font-size:10px}
+@media(max-width:700px){main{padding:14px}.top{padding:11px 13px}.stats{grid-template-columns:repeat(2,1fr);gap:8px}.stat{padding:12px}.stat b{font-size:23px}.grid{grid-template-columns:1fr;gap:9px}.name{font-size:12px}.actions button{padding:8px 9px;font-size:11px}.section-head{align-items:start;flex-direction:column}.hero{padding:21px 18px;border-radius:19px}.poster{width:78px;height:108px;flex-basis:78px}.poster-wrap{flex-basis:78px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+/* Performance mode for Android/mobile WebView */
+@media(max-width:700px){
+ body{background-attachment:scroll}
+ body:before{display:none}
+ header,.hero,.stat,.card,#novaWatchModal,.nw-head{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ .card,.stat{box-shadow:0 4px 14px #0002}
+ .card{transition:none}
+ .card:hover{transform:none;box-shadow:0 4px 14px #0002}
+ button,.btn{transition:none}
+ #novaWatchBg{backdrop-filter:none}
+}
+
+
+.epbtn{width:100%;margin:-2px 0 8px;background:linear-gradient(120deg,#0e7490aa,#4f46e5aa);border-color:#67e8f944;font-size:11px;text-align:left}
+.epc{background:#0008;border-radius:8px;padding:1px 7px;margin-left:4px}
+.modal.fm{width:min(720px,100%);max-height:90vh;display:flex;flex-direction:column}
+.fm-top{display:flex;gap:8px;align-items:center;margin-bottom:12px}.fm-top h3{margin:0;flex:1;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fm-body{overflow:auto;flex:1;display:grid;gap:8px}
+.row{display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px}
+.row .ic{font-size:24px}.row .inf{flex:1;min-width:0}.row .t{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:10px;color:var(--muted);margin-top:3px}.bar{height:3px;background:#fff2;border-radius:3px;margin-top:5px}.bar i{display:block;height:100%;background:var(--accent2);border-radius:3px}
+.row .ac{display:flex;gap:4px}.row .ac button{padding:7px 9px}
+.fm-foot{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#plBg .modal{width:min(900px,100%)}video{width:100%;max-height:68vh;background:#000;border-radius:14px}
+.pl-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}.pl-bar select{background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+.warn{display:none;margin-top:10px;padding:12px;border-radius:14px;background:#3a2330;border:1px solid #ff829e66;font-size:12px}
+#newPoster{padding:8px!important}#newYear,#newSeasons,#newEpisodes{min-width:0}.fm-body .section-head{margin:10px 0 6px}.fm-body .section-head h2{font-size:14px}
+
+/* Anime Watching integration — isolated from the base File Manager */
+.nova-watch-btn{background:linear-gradient(115deg,#7c3aed,#0891b2);border-color:transparent}
+#novaWatchBg{position:fixed;inset:0;z-index:35;background:#02040bdd;backdrop-filter:blur(9px);display:none;place-items:center;padding:14px}
+#novaWatchModal{width:min(920px,100%);max-height:92vh;overflow:auto;background:rgba(20,24,45,.98);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 25px 80px #000a}
+.nw-head{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:-18px;background:rgba(20,24,45,.98);padding:5px 0 12px;z-index:2}
+.nw-head h2{font-size:19px;margin:0}.nw-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.nw-list{display:grid;gap:12px}.nw-card{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.nw-poster{width:76px;height:108px;object-fit:cover;border-radius:10px;background:#171b31}
+.nw-title{font-size:14px;font-weight:800}.nw-meta{font-size:10px;color:var(--muted);margin:4px 0 8px}
+.nw-progress{height:5px;background:#ffffff20;border-radius:8px;overflow:hidden;margin:7px 0}.nw-progress i{display:block;height:100%;background:linear-gradient(90deg,#a78bfa,#67e8f9)}
+.nw-episodes{display:grid;gap:6px;margin-top:10px}.nw-episode{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:10px;background:#070b18aa;border:1px solid var(--line)}
+.nw-episode button{padding:6px 9px;font-size:10px}.nw-episode .nw-epname{flex:1;font-size:11px}.nw-episode.done .nw-epname{color:#9af4d1}
+.nw-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.nw-form label{font-size:10px;color:var(--muted)}.nw-form input,.nw-form select{display:block;width:100%;margin-top:4px;background:#0a0e1d;color:white;border:1px solid var(--line);border-radius:10px;padding:10px}
+.nw-form .full{grid-column:1/-1}
+@media(max-width:560px){.nw-card{grid-template-columns:58px minmax(0,1fr);gap:9px}.nw-poster{width:58px;height:84px}.nw-form{grid-template-columns:1fr}.nw-form .full{grid-column:auto}}
+
+</style>
+</head>
+<body>
+<header><div class="top">
+ <div class="brand"><div class="logo">▶</div><div><h1>Anime Watching Tracker</h1><div class="sub">Anime catalogue · Watching progress · Local video library</div></div></div>
+ <div class="actions"><button onclick="retryPosters()">Reload Posters</button><button class="nova-watch-btn" onclick="nwOpen()">▶ Watching Tracker</button><button onclick="openAdd()">＋ Add Anime</button><button class="primary" onclick="openFM()">📂 File Manager</button><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"/></div>
+</div></header>
+<main>
+ <section class="hero">
+  <div class="hero-kicker">YOUR PERSONAL ANIME SPACE</div>
+  <h2>Discover. Track. Enjoy.</h2>
+  <p>Organize your anime collection in one place. Manage posters, categories, watch status, seasons, episodes and local video files in a premium glass interface.</p>
+ </section>
+ <div class="stats">
+  <div class="stat"><b id="totalCount">0</b><span>Total Anime</span></div>
+  <div class="stat"><b id="watchedCount">0</b><span>Watched</span></div>
+  <div class="stat"><b id="partialCount">0</b><span>Watching</span></div>
+  <div class="stat"><b id="unwatchedCount">0</b><span>Unwatched</span></div>
+ </div>
+ <div class="controls">
+  <input id="search" placeholder="Search anime, genre or category..." oninput="render()"/>
+  <select id="dubFilter" onchange="render()"><option value="all">All Dub Statuses</option><option>Confirmed</option><option>Partial</option><option>Needs verification</option><option>Classic TV Dub</option><option>Hindi Audio Listed</option><option>Latest Hindi Dub</option><option>To Be Verified</option></select>
+  <select id="sort" onchange="render()"><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select>
+ </div>
+ <div class="smallnote" style="margin:8px 0 5px">Watch Lists</div><div class="tabs" id="tabs"></div>
+ <div class="smallnote" style="margin:8px 0 5px">Browse Categories</div><div class="tabs" id="genreTabs"></div>
+ <div class="section-head"><div><h2 id="sectionTitle">All Anime</h2><p id="sectionDesc">Browse your anime collection by category</p></div><div class="smallnote">Choose a status to filter your list</div></div>
+ <div id="content"></div>
+</main>
+
+<div id="novaWatchBg" role="dialog" aria-modal="true" aria-label="Anime Watching Tracker">
+ <div id="novaWatchModal">
+  <div class="nw-head"><div><h2>Watching Tracker</h2><div class="nw-sub">Track seasons, episodes and progress. Local videos stay in File Manager.</div></div><button onclick="nwClose()">✕</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="primary" onclick="nwShowForm()">＋ Add to Watching</button><button onclick="nwRender()">Refresh</button></div>
+  <div id="nwFormBox" hidden>
+   <div class="nw-form">
+    <label class="full">Anime title *<input id="nwName" placeholder="Anime title"></label>
+    <label>Release year<input id="nwYear" type="number" min="1950" max="2100" placeholder="2026"></label>
+    <label>Weekly release day<select id="nwDay"><option value="Not set">Not set</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></label>
+    <label>Seasons<input id="nwSeasons" type="number" min="1" max="30" value="1"></label>
+    <label>Episodes per season<input id="nwEpisodes" type="number" min="1" max="200" value="12"></label>
+    <label class="full">Custom poster<input id="nwPoster" type="file" accept="image/*"></label>
+   </div>
+   <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px"><button onclick="nwHideForm()">Cancel</button><button class="primary" onclick="nwAdd()">Save Anime</button></div>
+  </div>
+  <div id="nwList" class="nw-list"></div>
+ </div>
+</div>
+<footer>
+ <b>How to use:</b> Set each anime to Watched, Unwatched or Watching. JSON backups include anime details, statuses, Watching progress and poster references. Episode video files remain in app storage; use the File Manager download button to export a video file. Use the Watch Lists and Categories filters to organize your collection. Open Episodes on an anime card to manage local video files.<br>
+ <b>Data:</b> Anime details and watch status are stored on this device. Use Export and Import to back up your library. Episode videos are stored in the app's browser storage; storage limits depend on the device and available space.<br>
+ <b>Posters:</b> Posters are loaded from public anime artwork sources when available. You can also add your own poster when creating an anime.
+</footer>
+<div class="modal-bg" id="modalBg"><div class="modal">
+ <h3>Add Anime</h3>
+ <label class="smallnote">Anime Title</label><input id="newName" placeholder="e.g. Frieren: Beyond Journey's End"/>
+ <label class="smallnote">Category / Genre</label><input id="newGenre" placeholder="e.g. Fantasy"/>
+ <label class="smallnote">Dub Status</label><select id="newDub" style="width:100%;margin:7px 0 12px;background:var(--panel);color:var(--text);padding:11px;border:1px solid var(--line);border-radius:10px"><option>Official Hindi Dub</option><option>Legacy TV Dub</option><option>To Be Verified</option></select>
+ <label class="smallnote">Release Year</label><input id="newYear" type="number" min="1950" max="2100" placeholder="e.g. 2024"/>
+ <label class="smallnote">Number of Seasons</label><input id="newSeasons" type="number" min="1" max="99" value="1"/>
+ <label class="smallnote">Total Episodes (optional)</label><input id="newEpisodes" type="number" min="0" max="9999" placeholder="e.g. 24"/>
+ <label class="smallnote">Weekly Release Day (optional)</label><select id="newDay" style="width:100%;margin:7px 0 12px;background:var(--panel);color:var(--text);padding:11px;border:1px solid var(--line);border-radius:10px"><option value="">Not set</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select>
+ <label class="smallnote">Custom Poster (optional)</label><input id="newPoster" type="file" accept="image/*"/>
+ <div class="modal-actions"><button onclick="closeAdd()">Cancel</button><button class="primary" onclick="addAnime()">Add Anime</button></div>
+</div></div>
+<div class="modal-bg" id="fmBg"><div class="modal fm">
+ <div class="fm-top"><button id="fmBack" onclick="openFM()">←</button><h3 id="fmTitle"></h3><button onclick="closeFM()">✕</button></div>
+ <div class="fm-body" id="fmBody"></div>
+ <div class="fm-foot" id="fmFoot"><select id="seasonSelect" aria-label="Season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="1">Season 1</option></select><button class="primary" onclick="document.getElementById('upFile').click()">＋ Upload Episodes</button><input id="upFile" type="file" accept="video/*,.mkv,.mp4,.webm" multiple hidden onchange="uploadEps(event)"><span class="smallnote" id="fmMsg"></span></div>
+</div></div>
+<div class="modal-bg" id="plBg"><div class="modal">
+ <div class="fm-top"><h3 id="plTitle"></h3><button onclick="closePlayer()">✕</button></div>
+ <video id="vid" controls playsinline></video>
+ <div class="warn" id="plWarn">The built-in player could not play this video. Try an external video player.<div class="modal-actions" style="margin-top:8px"><button onclick="document.getElementById('plWarn').style.display='none'">Cancel</button><button class="primary" onclick="shareEp()">Open</button></div></div>
+ <div class="smallnote" id="plMsg" style="margin-top:8px"></div><div class="pl-bar"><button onclick="stepEp(-1)">⏮ Prev</button><button onclick="skipPlayer(-15)">↶ 15s</button><button onclick="skipPlayer(15)">15s ↷</button><button onclick="stepEp(1)">Next ⏭</button><input id="seekBar" aria-label="Seek video" type="range" min="0" max="1000" value="0" oninput="seekPlayer(this.value)" style="flex:1;min-width:120px"><select aria-label="Playback speed" onchange="vid.playbackRate=+this.value"><option value="1">1x</option><option value=".75">0.75x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select><label class="smallnote">Volume <input id="volume" type="range" min="0" max="1" step=".05" value="1" oninput="setPlayerVolume(this.value)" style="width:74px;vertical-align:middle"></label><label class="smallnote">Brightness <input id="brightness" type="range" min="40" max="160" value="100" oninput="setPlayerBrightness(this.value)" style="width:74px;vertical-align:middle"></label><select id="audioTrack" aria-label="Audio track" disabled><option>Default audio</option></select><label class="btn" style="padding:7px 9px">Subtitles<input type="file" accept=".srt,.vtt,text/vtt,application/x-subrip" hidden onchange="addSubtitle(event)"></label><button onclick="vid.requestFullscreen&&vid.requestFullscreen()">⛶ Full</button><button onclick="shareEp()">⤴ Open in External Player</button></div>
+</div></div>
+<script>
+const seed = [
+["Naruto","Action"],["Naruto Shippuden","Action"],["Boruto: Naruto Next Generations","Action"],["One Piece","Action"],["Bleach","Action"],["Bleach: Thousand-Year Blood War","Action"],["Dragon Ball","Action"],["Dragon Ball Z","Action"],["Dragon Ball Super","Action"],["Dragon Ball Daima","Action"],["Demon Slayer","Action"],["Jujutsu Kaisen","Action"],["Chainsaw Man","Action"],["My Hero Academia","Action"],["Solo Leveling","Action"],["Kaiju No. 8","Action"],["Wind Breaker","Action"],["Black Clover","Action"],["One-Punch Man","Action"],["Mob Psycho 100","Action"],["Hunter x Hunter (2011)","Action"],["Fullmetal Alchemist: Brotherhood","Action"],["Attack on Titan","Action"],["Tokyo Ghoul","Action"],["Fire Force","Action"],["Blue Exorcist","Action"],["Fairy Tail","Action"],["The Seven Deadly Sins","Action"],["JoJo's Bizarre Adventure","Action"],["Assassination Classroom","Action"],["Vinland Saga","Action"],["Mashle: Magic and Muscles","Action"],["Dandadan","Action"],["Zom 100: Bucket List of the Dead","Action"],["Rurouni Kenshin","Action"],["Gintama","Action"],["Dr. Stone","Action"],["The God of High School","Action"],["Tower of God","Action"],["World Trigger","Action"],
+["That Time I Got Reincarnated as a Slime","Fantasy / Isekai"],["Re:Zero","Fantasy / Isekai"],["Mushoku Tensei: Jobless Reincarnation","Fantasy / Isekai"],["The Rising of the Shield Hero","Fantasy / Isekai"],["Overlord","Fantasy / Isekai"],["KonoSuba","Fantasy / Isekai"],["Arifureta","Fantasy / Isekai"],["Tsukimichi: Moonlit Fantasy","Fantasy / Isekai"],["The Daily Life of the Immortal King","Fantasy / Isekai"],["The Beginning After the End","Fantasy / Isekai"],["I Was Reincarnated as the 7th Prince","Fantasy / Isekai"],["The Great Cleric","Fantasy / Isekai"],["I Got a Cheat Skill in Another World","Fantasy / Isekai"],["The Faraway Paladin","Fantasy / Isekai"],["No Game No Life","Fantasy / Isekai"],["Sword Art Online","Fantasy / Isekai"],["The Misfit of Demon King Academy","Fantasy / Isekai"],["Frieren: Beyond Journey's End","Fantasy / Isekai"],["The Apothecary Diaries","Fantasy / Isekai"],["Sentenced to Be a Hero","Fantasy / Isekai"],["A Wild Last Boss Appeared!","Fantasy / Isekai"],
+["Horimiya","Romance / Drama"],["Your Lie in April","Romance / Drama"],["My Dress-Up Darling","Romance / Drama"],["Rent-a-Girlfriend","Romance / Drama"],["Tomo-chan Is a Girl!","Romance / Drama"],["The Angel Next Door Spoils Me Rotten","Romance / Drama"],["My Love Story with Yamada-kun at Lv999","Romance / Drama"],["A Couple of Cuckoos","Romance / Drama"],["Alya Sometimes Hides Her Feelings in Russian","Romance / Drama"],["Blue Box","Romance / Drama"],["My Happy Marriage","Romance / Drama"],["Kimi ni Todoke","Romance / Drama"],["The Dangers in My Heart","Romance / Drama"],["The Quintessential Quintuplets","Romance / Drama"],["Golden Time","Romance / Drama"],["A Sign of Affection","Romance / Drama"],["Insomniacs After School","Romance / Drama"],["Hokkaido Gals Are Super Adorable!","Romance / Drama"],["Days with My Stepsister","Romance / Drama"],["The Shiunji Family Children","Romance / Drama"],
+["Death Note","Mystery / Thriller"],["Erased","Mystery / Thriller"],["Another","Mystery / Thriller"],["The Promised Neverland","Mystery / Thriller"],["Steins;Gate","Mystery / Thriller"],["Psycho-Pass","Mystery / Thriller"],["Terror in Resonance","Mystery / Thriller"],["Parasyte: The Maxim","Mystery / Thriller"],["Monster","Mystery / Thriller"],["Tomodachi Game","Mystery / Thriller"],["Classroom of the Elite","Mystery / Thriller"],["Hyouka","Mystery / Thriller"],["Summer Time Rendering","Mystery / Thriller"],["The Summer Hikaru Died","Mystery / Thriller"],["The Case Study of Vanitas","Mystery / Thriller"],["Toilet-bound Hanako-kun","Mystery / Thriller"],["The Detective Is Already Dead","Mystery / Thriller"],
+["Haikyu!!","Sports"],["Blue Lock","Sports"],["Kuroko's Basketball","Sports"],["Aoashi","Sports"],["Captain Tsubasa","Sports"],["SK8 the Infinity","Sports"],["The Prince of Tennis","Sports"],["Initial D","Sports"],["Yuri on Ice","Sports"],["Idaten Jump","Sports"],["Beyblade","Sports"],
+["Spy x Family","Comedy / Slice of Life"],["The Disastrous Life of Saiki K.","Comedy / Slice of Life"],["Komi Can't Communicate","Comedy / Slice of Life"],["Bocchi the Rock!","Comedy / Slice of Life"],["Nichijou","Comedy / Slice of Life"],["The Way of the Househusband","Comedy / Slice of Life"],["Barakamon","Comedy / Slice of Life"],["Buddy Daddies","Comedy / Slice of Life"],["ReLIFE","Comedy / Slice of Life"],["Pokémon","Comedy / Slice of Life"],["Doraemon","Comedy / Slice of Life"],["Crayon Shin-chan","Comedy / Slice of Life"],["Ninja Hattori","Comedy / Slice of Life"],["Perman","Comedy / Slice of Life"],["Kiteretsu","Comedy / Slice of Life"],
+["Cyberpunk: Edgerunners","Sci-Fi / Mecha"],["86 Eighty-Six","Sci-Fi / Mecha"],["Darling in the Franxx","Sci-Fi / Mecha"],["Mobile Suit Gundam: The Witch from Mercury","Sci-Fi / Mecha"],["Pluto","Sci-Fi / Mecha"],["Ghost in the Shell: SAC_2045","Sci-Fi / Mecha"],["Trigun Stampede","Sci-Fi / Mecha"],["Dorohedoro","Sci-Fi / Mecha"],["Undead Unluck","Sci-Fi / Mecha"],["Metallic Rouge","Sci-Fi / Mecha"],
+["Baki","Horror / Supernatural"],["Baki Hanma","Horror / Supernatural"],["Castlevania","Horror / Supernatural"],["Dorohedoro","Horror / Supernatural"],["Parasyte: The Maxim","Horror / Supernatural"],["The Grimm Variations","Horror / Supernatural"],["Akuma Kun","Horror / Supernatural"],
+["Your Name","Anime Movies"],["Weathering with You","Anime Movies"],["Suzume","Anime Movies"],["A Silent Voice","Anime Movies"],["The Garden of Words","Anime Movies"],["5 Centimeters per Second","Anime Movies"],["I Want to Eat Your Pancreas","Anime Movies"],["The Tunnel to Summer, the Exit of Goodbyes","Anime Movies"],["The Boy and the Heron","Anime Movies"],["Spirited Away","Anime Movies"],["Howl's Moving Castle","Anime Movies"],["My Neighbor Totoro","Anime Movies"],["Ponyo","Anime Movies"],["Demon Slayer: Mugen Train","Anime Movies"],["Black Clover: Sword of the Wizard King","Anime Movies"],["Stand by Me Doraemon","Anime Movies"],["Stand by Me Doraemon 2","Anime Movies"],["Pokémon: Mewtwo Strikes Back – Evolution","Anime Movies"],["Pokémon: Secrets of the Jungle","Anime Movies"],["My Oni Girl","Anime Movies"],["The Imaginary","Anime Movies"],["Lost in Starlight","Anime Movies"],
+["Dr. Stone: Ryusui","OVA / Specials"],["Ranking of Kings: Treasure Chest of Courage","OVA / Specials"],["My Hero Academia: Memories","OVA / Specials"],["Kaiju No. 8: Narumi's Week at Work","OVA / Specials"]
+];
+const key='animeWatchingTracker_v1';
+let extraSeed=[];
+let custom=JSON.parse(localStorage.getItem(key)||'[]');
+let statuses=JSON.parse(localStorage.getItem(key+'_statuses')||'{}');
+let hiddenAnime=JSON.parse(localStorage.getItem(key+'_hidden')||'[]');
+let active='All'; let activeGenre='All';
+let anime=[];function rebuild(){const base=seed.map(([name,genre])=>({name,genre,dub:'To Be Verified'}));anime=[...new Map([...base,...extraSeed,...custom].map(x=>[x.name.toLowerCase(),x])).values()].filter(x=>!hiddenAnime.includes(x.name.toLowerCase()))}rebuild();
+const genres=['All','Action','Fantasy / Isekai','Romance / Drama','Mystery / Thriller','Sports','Comedy / Slice of Life','Sci-Fi / Mecha','Horror / Supernatural','Anime Movies','OVA / Specials'];
+function genreList(){const have=new Set(anime.map(a=>a.genre));return['All',...genres.slice(1).filter(g=>have.has(g)),...[...have].filter(g=>!genres.includes(g))]}
+const folders=[['All','All Anime'],['watched','Watched'],['partial','Watching'],['unwatched','Unwatched']];
+
+
+/* ===== Episode File Manager (IndexedDB) ===== */
+const ST='eps';let _db;
+function db(){return _db||(_db=new Promise((res,rej)=>{const r=indexedDB.open('hdaVideos',1);r.onupgradeneeded=()=>{r.result.createObjectStore(ST,{keyPath:'id'}).createIndex('anime','anime')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+function tx(m,fn){return db().then(d=>new Promise((res,rej)=>{const t=d.transaction(ST,m),q=fn(t.objectStore(ST));t.oncomplete=()=>res(q&&q.result);t.onerror=t.onabort=()=>rej(t.error)}))}
+const epPut=r=>tx('readwrite',s=>s.put(r)),epDel=id=>tx('readwrite',s=>s.delete(id)),epAll=()=>tx('readonly',s=>s.getAll()),epOf=a=>tx('readonly',s=>s.index('anime').getAll(a)),epGet=id=>tx('readonly',s=>s.get(id));
+const $=id=>document.getElementById(id);
+const mb=n=>n>1e9?(n/1e9).toFixed(2)+' GB':(n/1e6).toFixed(1)+' MB';
+let fmAnime=null,plList=[],plIdx=0,plUrl='',lastSave=0;
+function countAll(){return db().then(d=>new Promise((res,rej)=>{const c={},r=d.transaction(ST).objectStore(ST).index('anime').openKeyCursor();r.onsuccess=()=>{const k=r.result;if(k){c[k.key]=(c[k.key]||0)+1;k.continue()}else res(c)};r.onerror=()=>rej(r.error)}))}
+function epMeta(){return db().then(d=>new Promise((res,rej)=>{const o=[],r=d.transaction(ST).objectStore(ST).openCursor();r.onsuccess=()=>{const k=r.result;if(k){o.push({anime:k.value.anime,size:k.value.size});k.continue()}else res(o)};r.onerror=()=>rej(r.error)}))}
+async function refreshCounts(){try{const c=await countAll();document.querySelectorAll('[data-ep]').forEach(el=>el.textContent=c[el.dataset.ep]||0)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openFolder(b.dataset.open)});
+function closeFM(){$('fmBg').style.display='none';refreshCounts()}
+async function openFM(){fmAnime=null;$('fmBg').style.display='grid';$('fmTitle').textContent='📂 File Manager';$('fmBack').style.visibility='hidden';$('fmFoot').style.display='none';
+ const all=await epMeta(),g={};all.forEach(e=>(g[e.anime]??=[]).push(e));
+ let est='';try{const x=await navigator.storage.estimate();est=`Used ${mb(x.usage)} / ${mb(x.quota)}`;if(navigator.storage.persist)navigator.storage.persist()}catch(e){}
+ const items=Object.entries(g).sort();
+ $('fmBody').innerHTML=`<div class="smallnote">${est} · ${all.length} Episodes · ${items.length} Folders</div>`+(items.length?items.map(([n,l])=>`<div class="row" data-open="${esc(n)}" style="cursor:pointer"><div class="ic">📁</div><div class="inf"><div class="t">${esc(n)}</div><div class="s">${l.length} Episode · ${mb(l.reduce((a,b)=>a+b.size,0))}</div></div></div>`).join(''):'<div class="empty">No episodes yet. Open an anime card and choose Episodes to upload videos.</div>')}
+async function openFolder(name){fmAnime=name;$('fmBg').style.display='grid';$('fmTitle').textContent='📁 '+name;$('fmBack').style.visibility='visible';$('fmFoot').style.display='flex';$('fmMsg').textContent='';const meta=anime.find(a=>a.name===name)||{},count=Math.max(1,Number(meta.seasons)||1);$('seasonSelect').innerHTML=Array.from({length:count},(_,i)=>`<option value="${i+1}">Season ${i+1}</option>`).join('');await drawFolder()}
+async function drawFolder(){const l=(await epOf(fmAnime)).sort((a,b)=>(a.season||1)-(b.season||1)||a.title.localeCompare(b.title,undefined,{numeric:true}));
+ if(!l.length){$('fmBody').innerHTML='<div class="empty">This folder is empty. Use Upload Episodes below.</div>';return}
+ const groups={};l.forEach(e=>(groups[e.season||1]??=[]).push(e));
+ $('fmBody').innerHTML=Object.entries(groups).map(([season,items])=>`<section><div class="section-head"><div><h2>Season ${season}</h2><p>${items.length} episode${items.length===1?'':'s'}</p></div></div>${items.map(e=>{const p=+localStorage.getItem('hda_pct_'+e.id)||0;return `<div class="row"><div class="ic">🎬</div><div class="inf"><div class="t">${esc(e.title)}</div><div class="s">${mb(e.size)}${p?' · '+p+'% watched':''}</div><div class="bar"><i style="width:${p}%"></i></div></div><div class="ac"><button class="primary" data-a="play" data-id="${e.id}">▶</button><button data-a="ext" data-id="${e.id}">⤴</button><button data-a="download" data-id="${e.id}">↓</button><button data-a="ren" data-id="${e.id}">✎</button><button data-a="del" data-id="${e.id}">✕</button></div></div>`}).join('')}</section>`).join('')}
+$('fmBody').addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;const id=b.dataset.id;
+ if(b.dataset.a==='play')playEp(id);
+ if(b.dataset.a==='ext'){await prepEp(id);shareEp()}
+ if(b.dataset.a==='download')downloadEp(id);
+ if(b.dataset.a==='del'&&confirm('Delete this episode from the app?')){await epDel(id);drawFolder()}
+ if(b.dataset.a==='ren'){const r=await epGet(id),n=prompt('Rename episode',r.title);if(n){r.title=n;await epPut(r);drawFolder()}}});
+async function downloadEp(id){const e=await epGet(id);if(!e)return;const url=URL.createObjectURL(e.blob),a=document.createElement('a');a.href=url;a.download=e.fileName||((e.title||'episode')+'.mp4');a.click();setTimeout(()=>URL.revokeObjectURL(url),15000)}
+async function uploadEps(ev){const fs=[...ev.target.files];let i=0;
+ for(const f of fs){i++;$('fmMsg').textContent=`Saving ${i}/${fs.length}: ${f.name}`;
+  try{await epPut({id:Date.now()+'_'+Math.random().toString(36).slice(2,6),anime:fmAnime,title:f.name.replace(/\.[^.]+$/,''),fileName:f.name,season:Number($('seasonSelect').value)||1,size:f.size,type:f.type||'video/*',blob:f,added:Date.now()})}
+  catch(e){alert('Could not save (storage may be full): '+f.name);break}}
+ ev.target.value='';$('fmMsg').textContent='✔ Saved in app storage. Removing the source file will not remove this copy.';drawFolder()}
+function skipPlayer(seconds){const v=$('vid');if(v.duration)v.currentTime=Math.max(0,Math.min(v.duration,v.currentTime+seconds))}
+function seekPlayer(value){const v=$('vid');if(v.duration)v.currentTime=v.duration*(Number(value)/1000)}
+function setPlayerVolume(value){$('vid').volume=Math.max(0,Math.min(1,Number(value)||0))}
+function setPlayerBrightness(value){$('vid').style.filter='brightness('+Math.max(40,Math.min(160,Number(value)||100))+'%)'}
+function refreshAudioTracks(){const v=$('vid'),sel=$('audioTrack');if(!sel)return;sel.innerHTML='';const tracks=v.audioTracks;if(!tracks||!tracks.length){sel.add(new Option('Default audio','-1'));sel.disabled=true;return}sel.disabled=false;for(let i=0;i<tracks.length;i++)sel.add(new Option(tracks[i].label||('Audio '+(i+1)),String(i)));sel.onchange=()=>{for(let i=0;i<tracks.length;i++)tracks[i].enabled=i===Number(sel.value)}}
+function addSubtitle(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;f.text().then(raw=>{let body=raw.replace(/^\uFEFF/,'').replace(/\r/g,'');if(!/\.vtt$/i.test(f.name)){body=body.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g,'$1.$2');body='WEBVTT\n\n'+body}else if(!/^WEBVTT/m.test(body.trimStart()))body='WEBVTT\n\n'+body;document.querySelectorAll('track[data-user-track]').forEach(t=>t.remove());const blob=new Blob([body],{type:'text/vtt'}),url=URL.createObjectURL(blob),track=document.createElement('track');track.kind='subtitles';track.label=f.name;track.srclang='en';track.src=url;track.default=true;track.dataset.userTrack='1';$('vid').appendChild(track);track.onload=()=>{try{$('vid').textTracks[0].mode='showing'}catch(e){}};}).catch(()=>alert('Could not read this subtitle file.'));ev.target.value=''}
+async function playEp(id){plList=(await epOf(fmAnime)).sort((a,b)=>a.title.localeCompare(b.title,undefined,{numeric:true}));plIdx=Math.max(0,plList.findIndex(e=>e.id===id));loadEp()}
+function loadEp(){const e=plList[plIdx];if(!e)return;if(plUrl)URL.revokeObjectURL(plUrl);plUrl=URL.createObjectURL(e.blob);
+ $('plBg').style.display='grid';$('plTitle').textContent=e.title;$('plWarn').style.display='none';const v=$('vid');v.src=plUrl;
+ const pos=+localStorage.getItem('hda_pos_'+e.id)||0;v.style.filter='none';v.volume=1;$('volume').value=1;$('brightness').value=100;$('seekBar').value=0;document.querySelectorAll('track[data-user-track]').forEach(t=>t.remove());v.onloadedmetadata=()=>{if(pos>3&&pos<v.duration-5)v.currentTime=pos;refreshAudioTracks()};v.play().catch(()=>{});
+ if(!statuses[fmAnime]){statuses[fmAnime]='partial';save()}
+ v.onerror=()=>$('plWarn').style.display='block';
+ v.ontimeupdate=()=>{if(v.duration){$('seekBar').value=Math.round(v.currentTime/v.duration*1000);if(Date.now()-lastSave>2000){lastSave=Date.now();localStorage.setItem('hda_pos_'+e.id,v.currentTime);localStorage.setItem('hda_pct_'+e.id,Math.round(v.currentTime/v.duration*100))}}};
+ v.onended=()=>{localStorage.setItem('hda_pct_'+e.id,100);localStorage.removeItem('hda_pos_'+e.id);stepEp(1)}}
+function stepEp(d){if(plList[plIdx+d]){plIdx+=d;loadEp()}}
+function closePlayer(){const v=$('vid');v.pause();v.removeAttribute('src');v.load();if(plUrl)URL.revokeObjectURL(plUrl);plUrl='';$('plBg').style.display='none';render();drawFolder&&fmAnime&&drawFolder()}
+const NP=(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())?Capacitor.registerPlugin('ExternalPlayer'):null;
+const b64of=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+async function shareEp(){const e=plList[plIdx];if(!e)return;const v=$('vid');v.pause();const msg=$('plMsg');
+ if(NP){try{const original=String(e.fileName||'episode.mp4'),ext=(original.match(/\.([A-Za-z0-9]{1,8})$/)||[])[1]||'mp4',name=e.id+'.'+ext;
+   const ck=await NP.check({name,size:e.size});
+   if(!ck.exists){const CH=3*1024*1024;for(let o=0;o<e.size;o+=CH){msg.textContent='Preparing video for external player… '+Math.round(o/e.size*100)+'%';await NP.write({name,data:await b64of(e.blob.slice(o,o+CH)),append:o>0})}}
+   msg.textContent='';await NP.open({name,mime:e.type||'video/*',title:e.title})}
+  catch(x){msg.textContent='';alert('Could not open external player: '+(x.message||x))}return}
+ const f=new File([e.blob],e.fileName||((e.title||'episode')+'.mp4'),{type:e.type||'video/*'});
+ try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:e.title});else alert('Use the installed Android app to open this video in another player.')}catch(x){}}
+async function prepEp(id){plList=(await epOf(fmAnime)).sort((a,b)=>a.title.localeCompare(b.title,undefined,{numeric:true}));plIdx=Math.max(0,plList.findIndex(e=>e.id===id))}
+
+function save(){localStorage.setItem(key,JSON.stringify(custom));localStorage.setItem(key+'_statuses',JSON.stringify(statuses));localStorage.setItem(key+'_hidden',JSON.stringify(hiddenAnime));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function setStatus(name,s){if(statuses[name]===s)delete statuses[name];else statuses[name]=s;save();render();}
+function render(){
+ const q=document.getElementById('search').value.trim().toLowerCase(),df=document.getElementById('dubFilter').value,sort=document.getElementById('sort').value;
+ const t=document.getElementById('tabs');t.innerHTML='';
+ folders.forEach(([id,label])=>{let b=document.createElement('button');b.className='tab '+(active===id?'active':'');b.textContent=label+(id==='All'?'':` (${anime.filter(a=>statuses[a.name]===id).length})`);b.onclick=()=>{active=id;render()};t.appendChild(b)});
+ const gt=document.getElementById('genreTabs');gt.innerHTML='';genreList().forEach(g=>{let b=document.createElement('button');b.className='tab '+(activeGenre===g?'active':'');b.textContent=g==='All'?'All Categories':g;b.onclick=()=>{activeGenre=g;render()};gt.appendChild(b)});
+ let list=anime.filter(a=>{
+  const statusOk=active==='All'||statuses[a.name]===active;
+  const genreOk=activeGenre==='All'||a.genre===activeGenre;
+  const searchOk=a.name.toLowerCase().includes(q)||String(a.genre||'').toLowerCase().includes(q)||String(a.dub||'').toLowerCase().includes(q)||String(a.year||'').toLowerCase().includes(q)||String(a.weeklyDay||'').toLowerCase().includes(q)||String(a.seasons||'').toLowerCase().includes(q)||String(a.episodes||'').toLowerCase().includes(q);
+  const dubOk=df==='all'||a.dub===df;
+  return statusOk&&genreOk&&searchOk&&dubOk;
+ });
+ // Genre tabs are shown after folder tabs; selecting genre from the category strip switches active genre.
+ document.getElementById('sectionTitle').textContent=(active==='All'?'All Anime':(folders.find(x=>x[0]===active)?.[1]||active))+(activeGenre==='All'?'':' · '+activeGenre);
+ document.getElementById('sectionDesc').textContent=active==='All'?'Browse your anime collection by category':'Anime in this watch list';
+ if(sort==='az')list.sort((a,b)=>a.name.localeCompare(b.name));else list.sort((a,b)=>b.name.localeCompare(a.name));
+ const counts={watched:0,partial:0,unwatched:0};Object.values(statuses).forEach(s=>counts[s]=(counts[s]||0)+1);
+ document.getElementById('totalCount').textContent=anime.length;
+ document.getElementById('watchedCount').textContent=counts.watched||0;
+ document.getElementById('partialCount').textContent=counts.partial||0;
+ document.getElementById('unwatchedCount').textContent=counts.unwatched||0;
+ const root=document.getElementById('content');
+ if(!list.length){root.innerHTML='<div class="empty">No anime found. Change your search or add a new title.</div>';return}
+ let grouped={};list.forEach(a=>(grouped[a.genre]??=[]).push(a));
+ root.innerHTML=Object.entries(grouped).map(([genre,items])=>`<section style="margin:18px 0 26px"><div class="section-head"><div><h2>${esc(genre)}</h2><p>${items.length} Anime</p></div></div><div class="grid">${items.map(card).join('')}</div></section>`).join('');
+ loadPosters(list);refreshCounts();
+}
+function card(a){const s=statuses[a.name]||'',n=esc(a.name);
+ const b=(k,l)=>`<button class="${s===k?'on-'+k:''}" data-st="${k}" data-name="${n}">${l}</button>`;
+ const details=[a.year,a.seasons?`${a.seasons} season${a.seasons===1?'':'s'}`:'',a.episodes?`${a.episodes} eps`: '',a.weeklyDay,a.releaseNote].filter(Boolean).join(' · ');
+ return `<article class="card" data-name="${n}"><div class="poster-wrap"><img class="poster" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${n} poster" data-title="${n}" src="${posterFallback(a.name)}"><span class="tag">${esc(a.dub)}</span></div><div class="card-body"><div class="name">${n}</div><div class="meta">${esc(a.genre)}${details?` · ${esc(details)}`:''}</div><button class="epbtn" data-open="${n}">📁 Episodes <span class="epc" data-ep="${n}">0</span></button><div class="status">${b('watched','Watched')}${b('unwatched','Unwatched')}${b('partial','Watching')}</div><div style="display:flex;gap:6px;margin-top:7px"><button data-edit-anime="${n}" style="padding:6px 9px;font-size:10px">Edit</button><button class="delete-anime" data-delete-anime="${n}" style="padding:6px 9px;font-size:10px">Remove Anime</button></div></div></article>`}
+document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit-anime]');if(ed){editAnime(ed.dataset.editAnime);return}const d=e.target.closest('[data-delete-anime]');if(d){deleteAnime(d.dataset.deleteAnime);return}const b=e.target.closest('[data-st]');if(b)setStatus(b.dataset.name,b.dataset.st)});
+async function editAnime(name){
+ const oldName=String(name),item=anime.find(a=>a.name===oldName);if(!item)return;
+ const nextName=prompt('Anime title',item.name);if(nextName===null)return;const title=nextName.trim();if(!title)return alert('Anime title cannot be empty');
+ if(anime.some(a=>a.name.toLowerCase()===title.toLowerCase()&&a.name!==oldName))return alert('That anime already exists');
+ const genre=prompt('Category / genre',item.genre||'Other');if(genre===null)return;
+ const dub=prompt('Dub status (Confirmed / Partial / Needs verification / Classic TV Dub / To Be Verified)',item.dub||'To Be Verified');if(dub===null)return;
+ const yearText=prompt('Release year (blank if unknown)',item.year||'');if(yearText===null)return;
+ const seasonsText=prompt('Number of seasons',item.seasons||1);if(seasonsText===null)return;
+ const episodesText=prompt('Episodes per season',item.episodes||0);if(episodesText===null)return;
+ const day=prompt('Weekly release day (or Not set)',item.weeklyDay||'Not set');if(day===null)return;
+ const updated={...item,name:title,genre:genre.trim()||'Other',dub:dub.trim()||'To Be Verified',year:Number(yearText)||null,seasons:Math.max(1,Math.min(99,Number(seasonsText)||1)),episodes:Math.max(0,Math.min(999,Number(episodesText)||0)),weeklyDay:day.trim()};
+ custom=custom.filter(a=>a.name.toLowerCase()!==oldName.toLowerCase()&&a.name.toLowerCase()!==title.toLowerCase());custom.push(updated);
+ if(oldName!==title){
+  if(statuses[oldName]){statuses[title]=statuses[oldName];delete statuses[oldName]}
+  hiddenAnime=hiddenAnime.filter(x=>x!==oldName.toLowerCase());
+  const rows=await epOf(oldName);for(const row of rows){row.anime=title;await epPut(row)}
+  nwItems=nwItems.map(x=>x.name===oldName?{...x,name:title}:x);nwSave();
+  if(posterCache[oldName]){posterCache[title]=posterCache[oldName];delete posterCache[oldName];savePosterCache()}
+ }
+ save();rebuild();render();if(fmAnime===oldName&&oldName!==title)openFolder(title);
+}
+async function deleteAnime(name){if(!confirm(`Remove ${name} and all its saved episodes from this app?`))return;const title=String(name);custom=custom.filter(a=>a.name.toLowerCase()!==title.toLowerCase());if(seed.some(a=>a[0].toLowerCase()===title.toLowerCase()))hiddenAnime.push(title.toLowerCase());delete statuses[title];delete posterCache[title];try{localStorage.setItem('hda_poster_cache',JSON.stringify(posterCache))}catch(e){}try{const rows=await epOf(title);for(const row of rows){await epDel(row.id);localStorage.removeItem('hda_pos_'+row.id);localStorage.removeItem('hda_pct_'+row.id)}}catch(e){}nwItems=nwItems.filter(x=>x.name.toLowerCase()!==title.toLowerCase());nwSave();save();rebuild();render()}
+
+
+
+let posterQueue=[],posterBusy=false,posterCache={};
+try{posterCache=JSON.parse(localStorage.getItem('hda_poster_cache')||'{}')||{};}catch(e){posterCache={};}
+let posterObserver=null,queuedPosterNames=new Set();
+function loadPosters(items){
+ if(!posterObserver){
+  posterObserver=new IntersectionObserver(entries=>{
+   entries.forEach(entry=>{
+    if(!entry.isIntersecting)return;
+    const img=entry.target;posterObserver.unobserve(img);
+    const name=img.dataset.title;
+    if(posterCache[name])applyPoster(name,posterCache[name]);
+    else if(!queuedPosterNames.has(name)){queuedPosterNames.add(name);posterQueue.push(name);}
+   });
+   runPosterQueue();
+  },{rootMargin:'900px 0px',threshold:0.01});
+ }
+ document.querySelectorAll('img[data-title]').forEach(img=>{
+  const name=img.dataset.title;
+  if(posterCache[name])applyPoster(name,posterCache[name]);
+  else posterObserver.observe(img);
+ });
+}
+function applyPoster(name,url){
+ document.querySelectorAll('img[data-title]').forEach(img=>{
+  if(img.dataset.title===name && img.dataset.loaded!=='1'){
+   img.dataset.loaded='1';
+   img.onerror=()=>{img.dataset.loaded='0';img.onerror=null;img.src=posterFallback(name);};
+   img.src=url;
+  }
+ });
+}
+function posterFallback(name){
+ const safe=String(name).replace(/[&<>]/g,'');
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="330"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#38345f"/><stop offset="1" stop-color="#151c2d"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><circle cx="120" cy="105" r="48" fill="#ffffff12"/><text x="50%" y="58%" text-anchor="middle" fill="#f1efff" font-size="15" font-family="Arial">${safe.slice(0,24)}</text><text x="50%" y="66%" text-anchor="middle" fill="#aab3c5" font-size="11" font-family="Arial">Poster placeholder</text></svg>`;
+ return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+}
+function normTitle(t){return String(t||'').toLowerCase().replace(/[^a-z0-9\u0980-\u09ff]/g,'');}
+async function timedFetch(url,options={},ms=5000){
+ const c=new AbortController(),timer=setTimeout(()=>c.abort(),ms);
+ try{return await fetch(url,{...options,signal:c.signal});}finally{clearTimeout(timer);}
+}
+async function fetchAniListBatch(names){
+ const fields=names.map((name,i)=>`a${i}: Media(search:${JSON.stringify(name)},type:ANIME){title{romaji english native} coverImage{extraLarge large}}`).join('\n');
+ const r=await timedFetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({query:`query { ${fields} }`})},6500);
+ if(!r.ok)throw new Error('AniList '+r.status);
+ const j=await r.json();
+ return names.map((name,i)=>({name,url:j?.data?.['a'+i]?.coverImage?.extraLarge||j?.data?.['a'+i]?.coverImage?.large||''}));
+}
+async function fetchKitsu(name){
+ try{
+  const r=await timedFetch('https://kitsu.io/api/edge/anime?filter[text]='+encodeURIComponent(name)+'&page[limit]=8',{},4000);
+  if(!r.ok)return '';
+  const rows=(await r.json()).data||[],q=normTitle(name);
+  rows.sort((a,b)=>{
+   const aa=a.attributes||{},bb=b.attributes||{};
+   const score=x=>[x.canonicalTitle,...Object.values(x.titles||{})].filter(Boolean).reduce((n,t)=>n+(normTitle(t)===q?100:normTitle(t).includes(q)||q.includes(normTitle(t))?20:0),0);
+   return score(bb)-score(aa);
+  });
+  const a=rows[0]?.attributes;
+  return a?.posterImage?.original||a?.posterImage?.large||a?.posterImage?.medium||'';
+ }catch(e){return '';}
+}
+async function fetchJikan(name){
+ try{
+  const r=await timedFetch('https://api.jikan.moe/v4/anime?q='+encodeURIComponent(name)+'&limit=5',{},4500);
+  if(!r.ok)return '';
+  const rows=(await r.json()).data||[],q=normTitle(name);
+  rows.sort((a,b)=>{
+   const score=x=>{const t=normTitle(x.title),e=normTitle(x.title_english),j=normTitle(x.title_japanese);return Math.max(t===q?100:0,e===q?100:0,j===q?100:0,t.includes(q)||q.includes(t)?25:0,e.includes(q)||q.includes(e)?20:0);};
+   return score(b)-score(a);
+  });
+  return rows[0]?.images?.jpg?.large_image_url||rows[0]?.images?.webp?.large_image_url||'';
+ }catch(e){return '';}
+}
+function savePosterCache(){try{localStorage.setItem('hda_poster_cache',JSON.stringify(posterCache));}catch(e){}}
+function retryPosters(){
+ posterQueue=[];queuedPosterNames.clear();
+ document.querySelectorAll('img[data-title]').forEach(img=>{
+  const name=img.dataset.title;img.dataset.loaded='0';img.src=posterFallback(name);delete posterCache[name];
+  if(posterObserver)posterObserver.observe(img);
+ });
+ savePosterCache();
+}
+async function posterWorker(){
+ while(posterQueue.length){
+  const names=posterQueue.splice(0,6);
+  let results=[];
+  try{results=await fetchAniListBatch(names);}catch(e){results=names.map(name=>({name,url:''}));}
+  for(const item of results){
+   let url=item.url;
+   if(!url)url=await fetchKitsu(item.name);
+   if(!url)url=await fetchJikan(item.name);
+   if(url){posterCache[item.name]=url;applyPoster(item.name,url);}
+   queuedPosterNames.delete(item.name);
+  }
+  savePosterCache();
+ }
+}
+let posterWorkers=0;
+function runPosterQueue(){
+ while(posterWorkers<2 && posterQueue.length){
+  posterWorkers++;
+  posterWorker().finally(()=>{posterWorkers--;runPosterQueue();});
+ }
+}
+
+function openAdd(){document.getElementById('modalBg').style.display='grid';}
+function closeAdd(){document.getElementById('modalBg').style.display='none';}
+async function addAnime(){
+ const name=$('newName').value.trim(),genre=$('newGenre').value.trim()||'Other',dub=$('newDub').value;
+ if(!name)return alert('Enter an anime title');
+ if(anime.some(a=>a.name.toLowerCase()===name.toLowerCase()))return alert('This anime is already in your library');
+ const year=Number($('newYear').value)||null,seasons=Math.max(1,Math.min(99,Number($('newSeasons').value)||1)),episodes=Math.max(0,Number($('newEpisodes').value)||0),weeklyDay=$('newDay').value;
+ let posterData='';const file=$('newPoster').files[0];
+ if(file){try{posterData=await compressPoster(file)}catch(e){alert('Could not read that poster image.');return}}
+ const item={name,genre,dub,year,seasons,episodes,weeklyDay,posterData};hiddenAnime=hiddenAnime.filter(x=>x!==name.toLowerCase());custom.push(item);
+ if(posterData){posterCache[name]=posterData;try{localStorage.setItem('hda_poster_cache',JSON.stringify(posterCache))}catch(e){delete posterCache[name];alert('Poster is too large to save. Anime details will still be added.')}}
+ save();rebuild();['newName','newGenre','newYear','newEpisodes','newPoster'].forEach(id=>$(id).value='');$('newSeasons').value='1';$('newDay').value='';closeAdd();active='All';activeGenre='All';render();
+}
+function compressPoster(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const maxW=500,maxH=700,scale=Math.min(1,maxW/img.width,maxH/img.height),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.78))};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('image'))};img.src=url})}
+async function exportData(){
+ const json=JSON.stringify({version:3,app:'Anime Watching Tracker',anime:custom,statuses,hiddenAnime,watching:nwItems,posterCache,exportedAt:new Date().toISOString()},null,2);
+ if(NP){try{await NP.write({name:'anime-library-backup.json',data:btoa(unescape(encodeURIComponent(json))),append:false});await NP.share({name:'anime-library-backup.json',mime:'application/json'})}catch(e){alert('Export failed: '+(e.message||e))}return}
+ const url=URL.createObjectURL(new Blob([json],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='anime-watching-tracker-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+function importData(e){
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.statuses)statuses={...statuses,...d.statuses};if(Array.isArray(d.hiddenAnime))hiddenAnime=[...new Set([...hiddenAnime,...d.hiddenAnime])];if(Array.isArray(d.anime))custom=[...custom,...d.anime.filter(x=>!custom.some(y=>y.name.toLowerCase()===x.name.toLowerCase()))];if(Array.isArray(d.watching)){nwItems=d.watching;nwSave()}if(d.posterCache&&typeof d.posterCache==='object'){posterCache={...posterCache,...d.posterCache};savePosterCache()}save();rebuild();render();alert('Import completed');}catch(err){alert('The selected file is not valid JSON');}};r.readAsText(f);e.target.value='';
+}
+render();
+fetch('./catalogue.json').then(r=>{if(!r.ok)throw new Error('catalogue unavailable');return r.json()}).then(rows=>{extraSeed=Array.isArray(rows)?rows:[];rebuild();render()}).catch(()=>{});
+
+/* Anime Watching tracker: separate storage key; uses the original AFM episode File Manager. */
+const NW_KEY='anime_watching_tracker_v1';
+let nwItems=[];try{nwItems=JSON.parse(localStorage.getItem(NW_KEY)||'[]')||[]}catch(e){nwItems=[]}
+function nwSave(){try{localStorage.setItem(NW_KEY,JSON.stringify(nwItems))}catch(e){alert('Could not save Watching data. Free some browser storage and try again.')}}
+function nwOpen(){document.getElementById('novaWatchBg').style.display='grid';nwRender()}
+function nwClose(){document.getElementById('novaWatchBg').style.display='none';nwHideForm()}
+function nwShowForm(){document.getElementById('nwFormBox').hidden=false;document.getElementById('nwName').focus()}
+function nwHideForm(){document.getElementById('nwFormBox').hidden=true}
+function nwEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function nwProgress(x){const total=x.seasons*x.episodes,done=Object.values(x.done||{}).filter(Boolean).length;return{total,done,pct:total?Math.round(done/total*100):0}}
+function nwAdd(){
+ const name=document.getElementById('nwName').value.trim();if(!name){alert('Enter an anime title');return}
+ if(nwItems.some(x=>x.name.toLowerCase()===name.toLowerCase())){alert('This anime is already in Watching');return}
+ const year=Number(document.getElementById('nwYear').value)||'',day=document.getElementById('nwDay').value;
+ const seasons=Math.max(1,Math.min(30,Number(document.getElementById('nwSeasons').value)||1)),episodes=Math.max(1,Math.min(200,Number(document.getElementById('nwEpisodes').value)||12));
+ const file=document.getElementById('nwPoster').files[0];
+ const finish=poster=>{
+  nwItems.unshift({id:'nw'+Date.now()+Math.random().toString(36).slice(2,6),name,year,day,seasons,episodes,poster,done:{}});
+  if(poster){posterCache[name]=poster;savePosterCache()}
+  nwSave();
+  if(!anime.some(a=>a.name.toLowerCase()===name.toLowerCase())){custom.push({name,genre:'Other',dub:'To Be Verified',year,seasons,episodes,weeklyDay:day,posterData:poster||''});save();rebuild();render()}
+  ['nwName','nwYear','nwPoster'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nwSeasons').value=1;document.getElementById('nwEpisodes').value=12;
+  nwHideForm();nwRender();
+ };
+ if(file){
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const scale=Math.min(1,480/img.width,700/img.height),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);finish(c.toDataURL('image/jpeg',.78))};
+  img.onerror=()=>{URL.revokeObjectURL(url);alert('Could not read the poster image')};img.src=url;
+ }else finish('');
+}
+function nwToggle(id,s,e){const x=nwItems.find(a=>a.id===id);if(!x)return;x.done=x.done||{};const k=s+'-'+e;if(x.done[k])delete x.done[k];else x.done[k]=true;nwSave();nwRender()}
+function nwDelete(id){if(!confirm('Delete this anime from Watching Tracker?'))return;nwItems=nwItems.filter(x=>x.id!==id);nwSave();nwRender()}
+let nwExpanded={};let nwSeason={};
+function nwRender(){
+ const root=document.getElementById('nwList');if(!root)return;
+ if(!nwItems.length){root.innerHTML='<div class="empty">Your Watching list is empty. Choose “Add to Watching” to create one.</div>';return}
+ root.innerHTML=nwItems.map(x=>{
+  const p=nwProgress(x),poster=x.poster||posterCache[x.name]||posterFallback(x.name);
+  const expanded=!!nwExpanded[x.id],season=Math.min(x.seasons,Math.max(1,Number(nwSeason[x.id])||1));
+  let episodes='';
+  if(expanded){
+   for(let e=1;e<=x.episodes;e++){
+    const done=!!(x.done||{})[season+'-'+e];
+    episodes+='<div class="nw-episode '+(done?'done':'')+'"><span class="nw-epname">Episode '+e+(done?' · Watched':'')+'</span><button data-nw-toggle="'+x.id+'" data-season="'+season+'" data-episode="'+e+'">'+(done?'✓ Watched':'Mark watched')+'</button></div>';
+   }
+  }
+  const seasonOptions=Array.from({length:x.seasons},(_,i)=>'<option value="'+(i+1)+'" '+(season===i+1?'selected':'')+'>Season '+(i+1)+'</option>').join('');
+  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" src="'+poster+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(x.day)+' · '+x.seasons+' Season · '+p.total+' Episodes</div><div class="nw-progress"><i style="width:'+p.pct+'%"></i></div><div class="nw-meta">'+p.done+'/'+p.total+' watched · '+p.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">📂 Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide episodes':'Show episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-episodes">'+episodes+'</div></div>':'')+'</div></article>';
+ }).join('');
+}
+document.getElementById('nwList').addEventListener('click',e=>{
+ const t=e.target.closest('[data-nw-toggle]'),d=e.target.closest('[data-nw-delete]'),f=e.target.closest('[data-nw-folder]'),x=e.target.closest('[data-nw-expand]');
+ if(t)nwToggle(t.dataset.nwToggle,Number(t.dataset.season),Number(t.dataset.episode));
+ if(d)nwDelete(d.dataset.nwDelete);
+ if(f){nwClose();openFolder(f.dataset.nwFolder)}
+ if(x){const id=x.dataset.nwExpand;nwExpanded[id]=!nwExpanded[id];nwRender()}
+});
+document.getElementById('nwList').addEventListener('change',e=>{
+ const s=e.target.closest('[data-nw-season]');if(s){nwSeason[s.dataset.nwSeason]=Number(s.value)||1;nwRender()}
+});
+document.getElementById('novaWatchBg').addEventListener('mousedown',e=>{if(e.target.id==='novaWatchBg')nwClose()});
+
+</script>
+</body></html>
