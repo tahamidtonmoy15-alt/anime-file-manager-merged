@@ -489,6 +489,11 @@ video{width:100%;max-height:65vh;background:#03050d;border:1px solid rgba(177,14
 #plWarn{color:#ffd7e2;background:rgba(99,26,57,.52);border-color:rgba(255,125,162,.34)}
 footer{border-top:1px solid rgba(174,143,231,.15)}
 
+
+.weekly-card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.weekly-card-actions button{flex:1 1 auto;min-height:35px;padding:8px 10px;font-size:10px}
+.weekly-card-actions button.primary{white-space:nowrap}
+@media(max-width:560px){.weekly-card-actions button{flex:1 1 100%}}
 /* Responsive layouts: solid header prevents the content bleeding through it */
 @media(max-width:760px){
  body{background-attachment:scroll}
@@ -655,7 +660,7 @@ footer{border-top:1px solid rgba(174,143,231,.15)}
  </div>
 </div>
 <div class="modal-bg" id="fmBg"><div class="modal fm">
- <div class="fm-top"><button id="fmBack" onclick="openFM()">←</button><h3 id="fmTitle"></h3><button onclick="closeFM()">✕</button></div>
+ <div class="fm-top"><button id="fmBack" onclick="fmBackAction()">←</button><h3 id="fmTitle"></h3><button onclick="closeFM()">✕</button></div>
  <div class="fm-body" id="fmBody"></div>
  <div class="fm-foot" id="fmFoot"><select id="seasonSelect" aria-label="Season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:10px;padding:9px"><option value="1">Season 1</option></select><button class="primary" onclick="document.getElementById('upFile').click()">＋ Upload Episodes</button><input id="upFile" type="file" accept="video/*,.mkv,.mp4,.webm" multiple hidden onchange="uploadEps(event)"><span class="smallnote" id="fmMsg"></span></div>
 </div></div>
@@ -703,8 +708,9 @@ function countAll(){return db().then(d=>new Promise((res,rej)=>{const c={},r=d.t
 function epMeta(){return db().then(d=>new Promise((res,rej)=>{const o=[],r=d.transaction(ST).objectStore(ST).openCursor();r.onsuccess=()=>{const k=r.result;if(k){o.push({anime:k.value.anime,size:k.value.size});k.continue()}else res(o)};r.onerror=()=>rej(r.error)}))}
 async function refreshCounts(){try{const c=await countAll();document.querySelectorAll('[data-ep]').forEach(el=>el.textContent=c[el.dataset.ep]||0)}catch(e){}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openFolder(b.dataset.open)});
-function closeFM(){$('fmBg').style.display='none';refreshCounts()}
-async function openFM(){fmAnime=null;$('fmBg').style.display='grid';$('fmTitle').textContent='📂 File Manager';$('fmBack').style.visibility='hidden';$('fmFoot').style.display='none';
+function closeFM(){$('fmBg').style.display='none';refreshCounts();if(weeklyReturnAfterFM){weeklyReturnAfterFM=false;$('weeklyBg').style.display='grid';weeklyRender()}}
+function fmBackAction(){if(weeklyReturnAfterFM){$('fmBg').style.display='none';weeklyReturnAfterFM=false;$('weeklyBg').style.display='grid';weeklyRender()}else openFM()}
+async function openFM(){weeklyReturnAfterFM=false;fmAnime=null;$('fmBg').style.display='grid';$('fmTitle').textContent='📂 File Manager';$('fmBack').style.visibility='hidden';$('fmFoot').style.display='none';
  const all=await epMeta(),g={};all.forEach(e=>(g[e.anime]??=[]).push(e));
  let est='';try{const x=await navigator.storage.estimate();est=`Used ${mb(x.usage)} / ${mb(x.quota)}`;if(navigator.storage.persist)navigator.storage.persist()}catch(e){}
  const items=Object.entries(g).sort();
@@ -972,7 +978,8 @@ $('weekPickBg').addEventListener('click',e=>{if(e.target.id==='weekPickBg')weekP
 /* Weekly schedule: only anime with a selected weekly release day appear here. */
 const WEEK_DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 let weeklySelected='All Days';
-function weeklyOpen(){weeklySelected='All Days';$('weeklyBg').style.display='grid';weeklyRender()}
+let weeklyReturnAfterFM=false;
+function weeklyOpen(){$('weeklyBg').style.display='grid';weeklyRender()}
 function weeklyClose(){$('weeklyBg').style.display='none'}
 function weeklyMatches(day){
  return anime.filter(a=>{
@@ -996,15 +1003,17 @@ function weeklyRender(){
  list.innerHTML=selected.map(a=>{
   const title=esc(a.name),poster=posterCache[a.name]||a.posterData||posterFallback(a.name);
   const extra=[a.genre,a.year,a.seasons?a.seasons+' season'+(Number(a.seasons)===1?'':'s'):'',a.episodes?a.episodes+' episodes':''].filter(Boolean).join(' · ');
-  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" data-open-tracker="'+title+'" title="Open Episode Tracker" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><button data-week-open="'+title+'">📁 Open Episodes</button></div></article>';
+  return '<article class="weekly-card"><img class="weekly-poster" loading="lazy" decoding="async" data-title="'+title+'" data-open-tracker="'+title+'" title="Open Episode Tracker" src="'+poster+'" alt="'+title+' poster"><div class="weekly-card-body"><div class="weekly-card-title">'+title+'</div><div class="weekly-card-meta">'+esc(String(a.weeklyDay||''))+(extra?' · '+esc(extra):'')+'</div><div class="weekly-card-actions"><button class="primary" data-week-open="'+title+'">📂 File Manager</button><button data-week-tracker="'+title+'">▶ Episode Tracker</button></div></div></article>';
  }).join('');
  loadPosters(selected);
 }
 $('weeklyBg').addEventListener('click',e=>{
  const day=e.target.closest('[data-week-day]');
  if(day){weeklySelected=day.dataset.weekDay;weeklyRender();return}
- const open=e.target.closest('[data-week-open]');
- if(open){const title=open.dataset.weekOpen;weeklyClose();nwEnsureTracker(title)}
+ const file=e.target.closest('[data-week-open]');
+ if(file){const title=file.dataset.weekOpen;weeklyReturnAfterFM=true;weeklyClose();openFolder(title);return}
+ const tracker=e.target.closest('[data-week-tracker]');
+ if(tracker){const title=tracker.dataset.weekTracker;weeklyClose();nwEnsureTracker(title)}
 });
 
 render();
@@ -1138,14 +1147,14 @@ function nwEnsureTracker(name){
   }
   if(a.weeklyDay)x.day=a.weeklyDay;
  }
- nwSave();nwExpanded[x.id]=true;nwSeason[x.id]=1;nwOpen();
+ nwSave();nwExpanded[x.id]=x.episodesCollapsed!==true;nwSeason[x.id]=1;nwOpen();
 }
 function nwRender(){
  const root=document.getElementById('nwList');if(!root)return;
  if(!nwItems.length){root.innerHTML='<div class="empty">Your Watching list is empty. Choose Add to Watching or click an anime poster and choose Manage Episodes.</div>';return}
  root.innerHTML=nwItems.map(raw=>{
   const x=nwNormalizeItem(raw),progress=nwProgress(x),poster=x.poster||posterCache[x.name]||posterFallback(x.name);
-  const expanded=!!nwExpanded[x.id],season=Math.min(x.seasons,Math.max(1,Number(nwSeason[x.id])||1)),episodeList=nwSeasonEpisodes(x,season);
+  const expanded=x.episodesCollapsed!==true,season=Math.min(x.seasons,Math.max(1,Number(nwSeason[x.id])||1)),episodeList=nwSeasonEpisodes(x,season);
   let epRows='';
   if(expanded){
    epRows=episodeList.map(e=>{
@@ -1157,7 +1166,7 @@ function nwRender(){
   }
   const seasonOptions=Array.from({length:x.seasons},(_,i)=>'<option value="'+(i+1)+'" '+(season===i+1?'selected':'')+'>Season '+(i+1)+'</option>').join('');
   const day=x.day&&x.day!=='Not set'?x.day:'Weekly day not set';
-  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" data-week-pick="'+nwEsc(x.name)+'" title="Click poster to set weekly release day" src="'+nwEsc(poster)+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(day)+' · '+x.seasons+' Season'+(x.seasons===1?'':'s')+'</div><div class="nw-progress"><i style="width:'+progress.pct+'%"></i></div><div class="nw-meta">'+progress.done+'/'+progress.total+' episodes watched · '+progress.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide episodes':'Show episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-add-episode"><input type="number" min="1" max="500" step="1" data-nw-range-input="'+x.id+'" placeholder="Episodes e.g. 12"><button data-nw-generate="'+x.id+'">Create 1–N</button></div><div class="nw-add-episode"><input type="number" min="1" step="1" data-nw-add-input="'+x.id+'" placeholder="Single episode number"><button data-nw-add-episode="'+x.id+'">Add Episode</button></div><div class="nw-episodes">'+(epRows||'<div class="smallnote">No episode numbers yet. Set a total above or add one episode number.</div>')+'</div></div>':'')+'</div></article>';
+  return '<article class="nw-card"><img class="nw-poster" loading="lazy" decoding="async" data-week-pick="'+nwEsc(x.name)+'" title="Click poster to set weekly release day" src="'+nwEsc(poster)+'" alt="Poster"><div><div class="nw-title">'+nwEsc(x.name)+'</div><div class="nw-meta">'+(x.year?nwEsc(x.year)+' · ':'')+nwEsc(day)+' · '+x.seasons+' Season'+(x.seasons===1?'':'s')+'</div><div class="nw-progress"><i style="width:'+progress.pct+'%"></i></div><div class="nw-meta">'+progress.done+'/'+progress.total+' episodes watched · '+progress.pct+'%</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-nw-folder="'+nwEsc(x.name)+'">Open File Manager</button><button data-nw-expand="'+x.id+'">'+(expanded?'Hide '+episodeList.length+' Episodes':'Show '+episodeList.length+' Episodes')+'</button><button data-nw-delete="'+x.id+'">Delete tracker</button></div>'+(expanded?'<div style="margin-top:9px"><select data-nw-season="'+x.id+'" aria-label="Choose season" style="background:#0a0e1d;color:#fff;border:1px solid var(--line);border-radius:9px;padding:8px">'+seasonOptions+'</select><div class="nw-add-episode"><input type="number" min="1" max="500" step="1" data-nw-range-input="'+x.id+'" placeholder="Episodes e.g. 12"><button data-nw-generate="'+x.id+'">Create 1–N</button></div><div class="nw-add-episode"><input type="number" min="1" step="1" data-nw-add-input="'+x.id+'" placeholder="Single episode number"><button data-nw-add-episode="'+x.id+'">Add Episode</button></div><div class="nw-episodes">'+(epRows||'<div class="smallnote">No episode numbers yet. Set a total above or add one episode number.</div>')+'</div></div>':'')+'</div></article>';
  }).join('');
 }
 document.getElementById('nwList').addEventListener('click',async e=>{
@@ -1172,7 +1181,7 @@ document.getElementById('nwList').addEventListener('click',async e=>{
  if(toggle){nwToggle(toggle.dataset.nwToggle,Number(toggle.dataset.season),Number(toggle.dataset.episode));return}
  if(del){nwDelete(del.dataset.nwDelete);return}
  if(folder){nwClose();openFolder(folder.dataset.nwFolder);return}
- if(expand){const id=expand.dataset.nwExpand;nwExpanded[id]=!nwExpanded[id];nwRender()}
+ if(expand){const id=expand.dataset.nwExpand,item=nwItems.find(x=>x.id===id);if(item){item.episodesCollapsed=item.episodesCollapsed!==true;nwExpanded[id]=item.episodesCollapsed!==true;nwSave()}nwRender()}
 });
 document.getElementById('nwList').addEventListener('change',e=>{
  const select=e.target.closest('[data-nw-season]');if(select){nwSeason[select.dataset.nwSeason]=Number(select.value)||1;nwRender()}
