@@ -2,8 +2,8 @@ from pathlib import Path
 
 manifest = Path("android/app/src/main/AndroidManifest.xml")
 xml = manifest.read_text(encoding="utf-8")
-
 provider_class = "androidx.core.content.FileProvider"
+
 if provider_class not in xml:
     provider = (
         '<provider android:name="androidx.core.content.FileProvider" '

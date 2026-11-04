@@ -4,11 +4,11 @@ An English-only Android anime library and watching tracker with a premium dark p
 
 ## Included
 
-- Bundled 251-title catalogue from the supplied list, grouped into Action/Adventure, Fantasy/Isekai, Romance/Drama, Mystery/Thriller, Sports, Comedy/Slice of Life, Sci-Fi/Mecha, Horror/Supernatural, Anime Movies, Classic TV Anime, OVA/Specials, Donghua and Latest Hindi Dub Releases. Source dub labels are represented as Confirmed, Partial, Needs verification, Classic TV Dub, Hindi Audio Listed, Latest Hindi Dub and To Be Verified.
+- Bundled 251-title catalogue from the supplied list, grouped into Action/Adventure, Fantasy/Isekai, Romance/Drama, Mystery/Thriller, Sports, Comedy/Slice of Life, Sci-Fi/Mecha, Horror/Supernatural, Anime Movies, Classic TV Anime, OVA/Specials, Donghua and Latest Hindi Dub Releases. Supplied dub labels are carried as Confirmed, Partial, Needs verification, Classic TV Dub, Hindi Audio Listed, Latest Hindi Dub and To Be Verified.
 - Anime poster lookup, custom poster upload, add/edit/delete, search, category and watch-status filters, and A–Z / Z–A sort.
-- Watching Tracker with release year, weekly release day, seasons, per-season episode ticks and progress.
+- Watching Tracker with year, weekly release day, seasons, per-season episode ticks and progress.
 - Local episode File Manager grouped by anime and season; videos are copied into app storage, sized, played, renamed, deleted and downloadable individually.
-- Built-in WebView player with seek, skip, playback speed, volume, brightness, subtitle loading and best-effort audio-track selection.
+- Built-in WebView player with seek, skip, speed, volume, brightness, subtitle loading and best-effort audio-track selection.
 - Android Open in Other Player action using the system compatible-app chooser.
 - JSON backup/restore for custom anime, statuses, Watching progress and poster references.
 - GitHub Actions debug APK build with Node 20 and Java 17.
@@ -29,5 +29,5 @@ An English-only Android anime library and watching tracker with a premium dark p
 - Internal video playback depends on Android WebView codecs. MKV, HEVC, 10-bit and unusual audio codecs are not guaranteed. External-player handoff opens Android's compatible-app chooser; installed player and codec support determine playback.
 - Audio-track selection is best-effort because many WebView versions do not expose the audioTracks API. Subtitle rendering depends on WebView support for the selected SRT/VTT subtitle.
 - This version uses the WebView player and Android external-player bridge; it does not yet bundle a native LibVLC engine. Playback must be tested on Redmi 13C / Android 15 before being marked verified.
-- Hindi-dub labels and release dates come from the supplied list and are not independently re-verified by this build.
+- Hindi-dub labels and release dates come from the supplied list and have not been independently re-verified by this build.
 
